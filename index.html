@@ -259,14 +259,18 @@
   .drum-cell.playing{ outline:2px solid #fff; outline-offset:2px; }
   .beatgap{ box-shadow:inset 3px 0 0 #5a5c6e; }
 
-  /* 8-step mode: fewer steps, so everything gets noticeably bigger */
+  /* fewer steps = bigger touch targets, scaling up further for 8 and 4 */
+  .app.sixteen{
+    --steps:16; --cell:44px; --cellgap:8px; --dot:18px;
+    --noteh:40px; --notefs:14px; --arrowh:22px; --octh:24px; --drumh:42px;
+  }
   .app.eight{
     --steps:8; --cell:60px; --cellgap:11px; --dot:22px;
     --noteh:52px; --notefs:17px; --arrowh:28px; --octh:30px; --drumh:54px;
   }
-  .app.sixteen{
-    --steps:16; --cell:44px; --cellgap:8px; --dot:18px;
-    --noteh:40px; --notefs:14px; --arrowh:22px; --octh:24px; --drumh:42px;
+  .app.four{
+    --steps:4; --cell:88px; --cellgap:14px; --dot:28px;
+    --noteh:68px; --notefs:21px; --arrowh:34px; --octh:36px; --drumh:70px;
   }
 
   .scope-panel{ padding:8px; display:none; }
@@ -969,11 +973,11 @@ function makeKnob(id, {min,max,value,onChange,format,default:defaultVal}){
   window.addEventListener('touchend', up);
   render();
   onChange(val);
-  return {set:(v)=>{val=v;render();onChange(val);}};
+  return {set:(v)=>{val=clamp(v,min,max);render();onChange(val);}};
 }
 
 const knobRefs = {};
-knobRefs.bpm = makeKnob('knob-bpm', {min:70,max:180,value:params.bpm, default:DEFAULT_PARAMS.bpm, format:v=>Math.round(v),
+knobRefs.bpm = makeKnob('knob-bpm', {min:40,max:200,value:params.bpm, default:DEFAULT_PARAMS.bpm, format:v=>Math.round(v),
   onChange:v=>{ params.bpm=Math.round(v); }});
 knobRefs.tune = makeKnob('knob-tune', {min:PARAM_RANGES.tune.min,max:PARAM_RANGES.tune.max,value:params.tune, default:DEFAULT_PARAMS.tune, format:v=>Math.round(v),
   onChange:v=>{ params.tune=Math.round(v); }});
@@ -1805,14 +1809,17 @@ document.getElementById('themeBtn').addEventListener('click', ()=>{
   applyTheme(THEMES[themeIndex].hex);
 });
 
-// ---- step length toggle (8 / 16)
+// ---- step length toggle (16 / 8 / 4)
+const STEP_LENGTHS = [16, 8, 4];
 document.getElementById('lenBtn').addEventListener('click', ()=>{
-  numSteps = (numSteps === 16) ? 8 : 16;
+  const idx = STEP_LENGTHS.indexOf(numSteps);
+  numSteps = STEP_LENGTHS[(idx + 1) % STEP_LENGTHS.length];
   const app = document.getElementById('app');
   const btn = document.getElementById('lenBtn');
-  app.classList.toggle('eight', numSteps === 8);
   app.classList.toggle('sixteen', numSteps === 16);
-  btn.classList.toggle('eight-on', numSteps === 8);
+  app.classList.toggle('eight', numSteps === 8);
+  app.classList.toggle('four', numSteps === 4);
+  btn.classList.toggle('eight-on', numSteps !== 16); // any non-default size gets the highlighted look
   btn.textContent = String(numSteps);
   if(currentStep >= numSteps) currentStep = 0;
   renderAcidRow();
@@ -1885,4 +1892,3 @@ document.getElementById('playBtn').addEventListener('click', async ()=>{
 </script>
 </body>
 </html>
-
