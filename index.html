@@ -151,6 +151,57 @@
     resize:vertical;
   }
 
+  .auto-panel{ border-color:#3a3560; }
+  .auto-hint{ margin:0 0 10px; font-size:11px; color:var(--dim); text-align:center; }
+  .auto-tabs{ display:flex; flex-wrap:wrap; gap:5px; justify-content:center; margin-bottom:10px; }
+  .auto-tabs button{
+    position:relative;
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:11px;
+    padding:6px 10px; border-radius:8px; border:1px solid #3a3b47;
+    background:#1c1d25; color:var(--dim); cursor:pointer;
+  }
+  .auto-tabs button.active{
+    background:linear-gradient(180deg,#4a63d6,#2c3d9c); color:#fff; border-color:#5a72e0;
+  }
+  .auto-tabs button.has-lane::after{
+    content:''; position:absolute; top:3px; right:3px; width:6px; height:6px;
+    border-radius:50%; background:var(--acid); box-shadow:0 0 5px var(--acid);
+  }
+  .auto-controls{
+    display:flex; align-items:center; justify-content:center; gap:14px;
+    margin-bottom:10px; flex-wrap:wrap;
+  }
+  .auto-onoff{ display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text); font-weight:600; }
+  .auto-onoff input{ width:16px; height:16px; }
+  #autoClearBtn{
+    font-family:'Rajdhani',sans-serif; font-weight:600; font-size:11px;
+    padding:6px 10px; border-radius:7px; border:1px solid #3a3b47;
+    background:#1c1d25; color:var(--dim); cursor:pointer;
+  }
+  #autoCanvas{
+    width:100%; height:110px; display:block; border-radius:10px;
+    background:#101018; box-shadow:inset 0 0 0 1px #2c2d38; touch-action:none;
+  }
+
+  .export-panel{ border-color:#2a4a3a; }
+  .export-lengths{ display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+  .export-lengths button{
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:12px;
+    padding:8px 12px; border-radius:8px; border:1px solid #3a3b47;
+    background:#1c1d25; color:var(--dim); cursor:pointer;
+  }
+  .export-lengths button.active{
+    background:linear-gradient(180deg,#2fae7a,#1b6b4a); color:#fff; border-color:#2fae7a;
+  }
+  .export-go{
+    display:block; width:100%; font-family:'Orbitron',sans-serif; font-weight:700; font-size:13px;
+    letter-spacing:.5px; padding:12px; border-radius:10px; border:1px solid #2fae7a;
+    background:linear-gradient(180deg,#2fae7a,#1b6b4a); color:#fff; cursor:pointer;
+  }
+  .export-go:active{ filter:brightness(0.9); }
+  .export-go[disabled]{ opacity:.5; }
+  .export-status{ margin:8px 0 0; text-align:center; font-size:11px; color:var(--dim); min-height:14px; }
+
   .seq-section{ margin-bottom:16px; }  .seq-section h3{
     font-family:'Orbitron',sans-serif; font-size:11px; letter-spacing:2px;
     color:var(--dim); margin:0 0 8px 4px; font-weight:700;
@@ -239,6 +290,13 @@
     box-shadow:0 0 8px rgba(var(--acid-rgb),.25);
   }
 
+  #resetBtn{
+    font-family:'Orbitron',sans-serif; font-weight:700; font-size:10px; letter-spacing:1px;
+    padding:10px 10px; border-radius:10px; border:1px solid #4a2b2b;
+    background:#1c1d25; color:#e08a8a; cursor:pointer;
+  }
+  #resetBtn:active{ background:#2a1414; }
+
   #themeBtn{
     font-family:'Orbitron',sans-serif; font-weight:700; font-size:10px; letter-spacing:1px;
     padding:10px 10px; border-radius:10px; border:1px solid #3a3b47;
@@ -284,6 +342,7 @@
       <button id="themeBtn" title="theme color"><span class="theme-dot" id="themeDot"></span>THEME</button>
       <button id="scopeBtn" title="oscilloscope">SCOPE</button>
       <button id="lenBtn">16</button>
+      <button id="resetBtn" title="reset all knobs and automation">RESET</button>
       <button id="playBtn">PLAY</button>
     </div>
   </header>
@@ -339,6 +398,19 @@
       <div class="knob-wrap"><div class="knob" id="knob-release"><div class="ind"></div></div><div class="knob-label">Release</div><div class="knob-value" id="val-release">80ms</div></div>
       <div class="knob-wrap"><div class="knob" id="knob-depth"><div class="ind"></div></div><div class="knob-label">Depth</div><div class="knob-value" id="val-depth">70%</div></div>
     </div>
+  </div>
+
+  <div class="panel auto-panel">
+    <h4>AUTOMATION</h4>
+    <p class="auto-hint">pick a knob, then draw its value across the steps — loops with the pattern</p>
+    <div class="auto-tabs" id="autoTabs"></div>
+    <div class="auto-controls">
+      <label class="auto-onoff">
+        <input type="checkbox" id="autoEnable"> <span id="autoEnableLabel">on for TUNE</span>
+      </label>
+      <button id="autoClearBtn">Clear this lane</button>
+    </div>
+    <canvas id="autoCanvas" width="720" height="110"></canvas>
   </div>
 
   <div class="panel gen-panel">
@@ -397,6 +469,19 @@
     </div>
   </div>
 
+  <div class="panel export-panel">
+    <h4>SAVE AS WAV</h4>
+    <p class="auto-hint">renders the current pattern (with automation) to a downloadable file — good for a quick clip in a story or short video</p>
+    <div class="export-lengths" id="exportLengths">
+      <button data-v="8">8 steps</button>
+      <button data-v="16" class="active">16 steps</button>
+      <button data-v="32">32 steps</button>
+      <button data-v="64">64 steps</button>
+    </div>
+    <button id="exportBtn" class="export-go">Render &amp; download WAV</button>
+    <p id="exportStatus" class="export-status"></p>
+  </div>
+
   <footer>tap PLAY, then edit knobs &amp; steps live — everything updates in real time</footer>
 </div>
 
@@ -410,9 +495,49 @@ const params = {
   filterType:'lowpass', cutoff:420, reso:12, mix:1.0,
   attack:0.004, decay:0.22, sustain:0.15, release:0.08, depth:0.70
 };
+const DEFAULT_PARAMS = {...params};
 const ROOT_FREQ = 55; // A1 — one octave down for a deeper default tone
 const genParams = { style:'classic', scale:'phrygian', density:0.62, slides:0.30, accents:0.25, octjump:0.20 };
+const DEFAULT_GEN_PARAMS = {...genParams};
 let numSteps = 16; // 8 or 16, toggled from the header
+
+// Which knobs can be automated, and their range (used both to build the
+// knobs themselves and to convert an automation lane's 0..1 value into the
+// real parameter value). Kept deliberately small: WAVE, FILTER TYPE, DRIVE
+// and BPM stay as plain knobs/switches -- drive can't be automated cleanly
+// (a WaveShaper curve isn't something you can schedule over time), and the
+// others are structural rather than expressive, so automating them would
+// add complexity without adding much fun.
+const PARAM_RANGES = {
+  tune:    {min:-12,  max:12,   label:'Tune'},
+  accent:  {min:0,    max:1,    label:'Accent'},
+  cutoff:  {min:60,   max:6000, label:'Freq'},
+  reso:    {min:0.5,  max:26,   label:'Reso'},
+  mix:     {min:0,    max:1,    label:'Mix'},
+  attack:  {min:0.001,max:0.15, label:'Attack'},
+  decay:   {min:0.02, max:0.8,  label:'Decay'},
+  sustain: {min:0,    max:1,    label:'Sustain'},
+  release: {min:0.02, max:0.5,  label:'Release'},
+  depth:   {min:0,    max:1,    label:'Depth'}
+};
+const AUTOMATABLE = Object.keys(PARAM_RANGES);
+
+// One 16-slot lane per automatable param. Values are stored normalised
+// (0..1) so the graph editor doesn't need to know each param's real range;
+// denormAuto() below converts to the real value at read time. Lanes loop
+// every `numSteps`, same as the acid/drum patterns, so everything stays in sync.
+const automation = {};
+AUTOMATABLE.forEach(key => { automation[key] = { enabled:false, values:new Array(16).fill(0.5) }; });
+let automationEditKey = AUTOMATABLE[0];
+
+function denormAuto(key, norm){
+  const r = PARAM_RANGES[key];
+  return r.min + (r.max - r.min) * norm;
+}
+function normAuto(key, value){
+  const r = PARAM_RANGES[key];
+  return (value - r.min) / (r.max - r.min);
+}
 
 const OCT_RANGE = [-2,-1,0,1,2];
 
@@ -435,11 +560,13 @@ const state = {
 };
 
 // ---------------------------------------------------------------- audio engine
-let ctx=null, master=null, limiter=null;
-let osc=null, filterNode=null, driveShaper=null, drivePre=null, dryGain=null, wetGain=null, ampGain=null;
-let noiseBuffer=null, analyser=null;
-let isPlaying=false, currentStep=0, nextStepTime=0, timerID=null, prevAcidActive=false;
+let ctx=null, master=null, limiter=null, analyser=null;
+let noiseBuffer=null;
+let liveVoice=null; // the persistent live oscillator/filter/amp chain
+let isPlaying=false, currentStep=0, nextStepTime=0, timerID=null;
+let livePrevRef = {value:false}; // tracks whether the previous live step sounded, for slide-into-legato
 let stepQueue=[];
+let isRendering=false; // true while a WAV export is running, blocks a second one
 
 function makeDriveCurve(amount){
   // Gentle saturation at high resolution. The old curve used k=1+amount*18 over
@@ -453,12 +580,45 @@ function makeDriveCurve(amount){
   }
   return curve;
 }
-function createNoiseBuffer(){
-  const len = ctx.sampleRate*1;
-  const buf = ctx.createBuffer(1,len,ctx.sampleRate);
+function buildNoiseBuffer(audioCtx){
+  const len = audioCtx.sampleRate*1;
+  const buf = audioCtx.createBuffer(1,len,audioCtx.sampleRate);
   const d = buf.getChannelData(0);
   for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
   return buf;
+}
+
+// Builds one full voice: osc -> drive -> filter -> (dry/wet) -> amp -> destination.
+// Used for both the live persistent voice and a fresh offline-render voice, so
+// a WAV export is built from exactly the same signal path you hear live.
+function buildVoiceGraph(audioCtx, destination, p){
+  const osc = audioCtx.createOscillator();
+  osc.type = p.wave;
+  const filterNode = audioCtx.createBiquadFilter();
+  filterNode.type = p.filterType;
+  filterNode.frequency.value = p.cutoff;
+  filterNode.Q.value = p.reso;
+  const driveShaper = audioCtx.createWaveShaper();
+  driveShaper.curve = makeDriveCurve(p.drive);
+  driveShaper.oversample = '2x';
+  const drivePre = audioCtx.createGain(); drivePre.gain.value = 1 + p.drive*3;
+  const dryGain = audioCtx.createGain(); dryGain.gain.value = 1-p.mix;
+  const wetGain = audioCtx.createGain(); wetGain.gain.value = p.mix;
+  const ampGain = audioCtx.createGain(); ampGain.gain.value = 0;
+
+  // osc -> drive -> filter -> amp. The drive must sit BEFORE the filter, or its
+  // saturation flattens the filter's output and the cutoff knob does nothing.
+  osc.connect(drivePre);
+  drivePre.connect(driveShaper);
+  driveShaper.connect(filterNode);   // wet = filtered
+  driveShaper.connect(dryGain);      // dry = unfiltered, for the MIX knob
+  filterNode.connect(wetGain);
+  dryGain.connect(ampGain);
+  wetGain.connect(ampGain);
+  ampGain.connect(destination);
+  osc.start();
+
+  return { osc, filterNode, driveShaper, drivePre, dryGain, wetGain, ampGain };
 }
 
 function initAudio(){
@@ -474,45 +634,19 @@ function initAudio(){
   limiter.connect(analyser);
   limiter.connect(ctx.destination);
 
-  osc = ctx.createOscillator();
-  osc.type = params.wave;
-  filterNode = ctx.createBiquadFilter();
-  filterNode.type = params.filterType;
-  filterNode.frequency.value = params.cutoff;
-  filterNode.Q.value = params.reso;
-  driveShaper = ctx.createWaveShaper();
-  driveShaper.curve = makeDriveCurve(params.drive);
-  driveShaper.oversample = '2x';
-
-  dryGain = ctx.createGain(); dryGain.gain.value = 1-params.mix;
-  wetGain = ctx.createGain(); wetGain.gain.value = params.mix;
-  ampGain = ctx.createGain(); ampGain.gain.value = 0;
-
-  // osc -> drive -> filter -> amp. The drive must sit BEFORE the filter, or its
-  // saturation flattens the filter's output and the cutoff knob does nothing.
-  drivePre = ctx.createGain(); drivePre.gain.value = 1 + params.drive*3;
-  osc.connect(drivePre);
-  drivePre.connect(driveShaper);
-  driveShaper.connect(filterNode);   // wet = filtered
-  driveShaper.connect(dryGain);      // dry = unfiltered, for the MIX knob
-  filterNode.connect(wetGain);
-  dryGain.connect(ampGain);
-  wetGain.connect(ampGain);
-  ampGain.connect(master);
-  osc.start();
-
-  noiseBuffer = createNoiseBuffer();
+  liveVoice = buildVoiceGraph(ctx, master, params);
+  noiseBuffer = buildNoiseBuffer(ctx);
   scopeData = new Uint8Array(analyser.fftSize);
 }
 
-function scheduleEnvelope(param, base, peakDelta, t, stepDur, accented){
+function scheduleEnvelope(p, param, base, peakDelta, t, stepDur, accented){
   // A 16th step is short (~115ms at 130bpm), so the raw A/D/R times can easily
   // exceed the note. Scale the stages to fit instead of letting the next note
   // cut them off -- otherwise decay/sustain/release are simply never heard.
-  let a = Math.max(params.attack, 0.001);
-  let d = Math.max(params.decay, 0.005);
-  let r = Math.max(params.release, 0.005);
-  const s = params.sustain;
+  let a = Math.max(p.attack, 0.001);
+  let d = Math.max(p.decay, 0.005);
+  let r = Math.max(p.release, 0.005);
+  const s = p.sustain;
 
   const noteLen = stepDur * 0.98;
   const minSustain = noteLen * 0.06;      // always leave a sliver of sustain
@@ -525,7 +659,7 @@ function scheduleEnvelope(param, base, peakDelta, t, stepDur, accented){
     d *= k; r *= k;
   }
 
-  const accMul = accented ? (1 + params.accent) : 1;
+  const accMul = accented ? (1 + p.accent) : 1;
   const peak = base + peakDelta * accMul;
   const sustainVal = base + (peak - base) * s;
 
@@ -544,77 +678,105 @@ function scheduleEnvelope(param, base, peakDelta, t, stepDur, accented){
 // Applied when a knob moves so changes are audible immediately, not only at the
 // next note. Without this the filter section feels dead while you turn it.
 function refreshFilterNow(){
-  if(!filterNode || !ctx) return;
+  if(!liveVoice || !ctx) return;
   if(!isPlaying){
-    filterNode.frequency.cancelScheduledValues(ctx.currentTime);
-    filterNode.frequency.setTargetAtTime(params.cutoff, ctx.currentTime, 0.02);
+    liveVoice.filterNode.frequency.cancelScheduledValues(ctx.currentTime);
+    liveVoice.filterNode.frequency.setTargetAtTime(params.cutoff, ctx.currentTime, 0.02);
   }
 }
 
-function noteFreq(totalSemi){
-  return ROOT_FREQ * Math.pow(2,(params.tune+totalSemi)/12);
+function noteFreq(p, totalSemi){
+  return ROOT_FREQ * Math.pow(2,(p.tune+totalSemi)/12);
 }
 
-function triggerAcidNote(t, degreeSemi, octave, stepDur, accented){
-  const freq = noteFreq(degreeSemi + octave*12);
-  osc.frequency.cancelScheduledValues(t);
-  osc.frequency.setValueAtTime(freq, t);
-  scheduleEnvelope(ampGain.gain, 0, 1, t, stepDur, accented);
-  scheduleEnvelope(filterNode.frequency, params.cutoff, params.depth*4000, t, stepDur, accented);
+function triggerAcidNote(p, voice, t, degreeSemi, octave, stepDur, accented){
+  const freq = noteFreq(p, degreeSemi + octave*12);
+  voice.osc.frequency.cancelScheduledValues(t);
+  voice.osc.frequency.setValueAtTime(freq, t);
+  scheduleEnvelope(p, voice.ampGain.gain, 0, 1, t, stepDur, accented);
+  scheduleEnvelope(p, voice.filterNode.frequency, p.cutoff, p.depth*4000, t, stepDur, accented);
 }
-function slideAcidNote(t, degreeSemi, octave){
-  const freq = noteFreq(degreeSemi + octave*12);
-  osc.frequency.cancelScheduledValues(t);
-  osc.frequency.setTargetAtTime(freq, t, 0.055);
+function slideAcidNote(p, voice, t, degreeSemi, octave){
+  const freq = noteFreq(p, degreeSemi + octave*12);
+  voice.osc.frequency.cancelScheduledValues(t);
+  voice.osc.frequency.setTargetAtTime(freq, t, 0.055);
 }
 
-function triggerKick(t){
-  const o=ctx.createOscillator(), g=ctx.createGain();
+function triggerKick(audioCtx, dest, t){
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
   o.type='sine';
   o.frequency.setValueAtTime(165,t);
   o.frequency.exponentialRampToValueAtTime(45,t+0.12);
   g.gain.setValueAtTime(1.3,t);
   g.gain.exponentialRampToValueAtTime(0.001,t+0.28);
-  o.connect(g).connect(master);
+  o.connect(g).connect(dest);
   o.start(t); o.stop(t+0.3);
 }
-function triggerClap(t){
+function triggerClap(audioCtx, dest, noiseBuf, t){
   [0,0.008,0.016].forEach(off=>{
-    const src=ctx.createBufferSource(); src.buffer=noiseBuffer;
-    const bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=1500; bp.Q.value=1.2;
-    const g=ctx.createGain();
+    const src=audioCtx.createBufferSource(); src.buffer=noiseBuf;
+    const bp=audioCtx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=1500; bp.Q.value=1.2;
+    const g=audioCtx.createGain();
     g.gain.setValueAtTime(0.9,t+off);
     g.gain.exponentialRampToValueAtTime(0.001,t+off+0.15);
-    src.connect(bp).connect(g).connect(master);
+    src.connect(bp).connect(g).connect(dest);
     src.start(t+off); src.stop(t+off+0.17);
   });
 }
-function triggerHat(t){
-  const src=ctx.createBufferSource(); src.buffer=noiseBuffer;
-  const hp=ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=7200;
-  const g=ctx.createGain();
+function triggerHat(audioCtx, dest, noiseBuf, t){
+  const src=audioCtx.createBufferSource(); src.buffer=noiseBuf;
+  const hp=audioCtx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=7200;
+  const g=audioCtx.createGain();
   g.gain.setValueAtTime(0.5,t);
   g.gain.exponentialRampToValueAtTime(0.001,t+0.045);
-  src.connect(hp).connect(g).connect(master);
+  src.connect(hp).connect(g).connect(dest);
   src.start(t); src.stop(t+0.06);
 }
 
 function stepDuration(){ return 60/params.bpm/4; }
 
-function scheduleStep(i,t){
+// Applies any enabled automation lanes for step `i` into `p` (mutating it),
+// and pushes the two params that are held AudioParams (filter Q, dry/wet mix)
+// onto the given voice's nodes at time t. Attack/decay/sustain/release/depth/
+// tune/accent/cutoff don't need that -- they're plain numbers read fresh by
+// triggerAcidNote/scheduleEnvelope at the moment each note is scheduled, so
+// just updating `p` here is enough for those to take effect on this step.
+function applyAutomationForStep(i, p, voice, t, updateKnobs){
+  const idx = i % numSteps;
+  AUTOMATABLE.forEach(key => {
+    const lane = automation[key];
+    if(!lane || !lane.enabled) return;
+    const val = denormAuto(key, lane.values[idx]);
+    p[key] = val;
+    if(key === 'reso') voice.filterNode.Q.setValueAtTime(val, t);
+    if(key === 'mix'){ voice.dryGain.gain.setValueAtTime(1-val, t); voice.wetGain.gain.setValueAtTime(val, t); }
+    if(updateKnobs && knobRefs[key]) knobRefs[key].set(val);
+  });
+}
+
+// One step of the pattern: the acid note (if any) plus any drum hits, played
+// through the given voice/context/destination. Shared by live playback and
+// offline WAV rendering so both sound identical.
+function playPatternStep(i, t, p, voice, audioCtx, dest, noiseBuf, prevActiveRef){
+  const idx = i % numSteps;
   const dur = stepDuration();
-  const s = state.acid[i];
+  const s = state.acid[idx];
   if(s.active){
     const semi = DEGREES[s.degreeIndex];
-    if(s.slide && prevAcidActive){ slideAcidNote(t, semi, s.octave); }
-    else { triggerAcidNote(t, semi, s.octave, dur, s.accent); }
-    prevAcidActive = true;
+    if(s.slide && prevActiveRef.value){ slideAcidNote(p, voice, t, semi, s.octave); }
+    else { triggerAcidNote(p, voice, t, semi, s.octave, dur, s.accent); }
+    prevActiveRef.value = true;
   } else {
-    prevAcidActive = false;
+    prevActiveRef.value = false;
   }
-  if(state.drums.kick[i]) triggerKick(t);
-  if(state.drums.clap[i]) triggerClap(t);
-  if(state.drums.hat[i]) triggerHat(t);
+  if(state.drums.kick[idx]) triggerKick(audioCtx, dest, t);
+  if(state.drums.clap[idx]) triggerClap(audioCtx, dest, noiseBuf, t);
+  if(state.drums.hat[idx])  triggerHat(audioCtx, dest, noiseBuf, t);
+}
+
+function scheduleStep(i,t){
+  applyAutomationForStep(i, params, liveVoice, t, true);
+  playPatternStep(i, t, params, liveVoice, ctx, master, noiseBuffer, livePrevRef);
 }
 
 function scheduler(){
@@ -625,6 +787,106 @@ function scheduler(){
     currentStep = (currentStep+1)%numSteps;
   }
   timerID = setTimeout(scheduler, 25);
+}
+
+// ---------------------------------------------------------------- WAV export
+function encodeWav(audioBuffer){
+  const numChannels = audioBuffer.numberOfChannels;
+  const sampleRate = audioBuffer.sampleRate;
+  const numFrames = audioBuffer.length;
+  const bytesPerSample = 2;
+  const blockAlign = numChannels * bytesPerSample;
+  const dataSize = numFrames * blockAlign;
+  const buf = new ArrayBuffer(44 + dataSize);
+  const view = new DataView(buf);
+  function writeStr(offset, str){ for(let i=0;i<str.length;i++) view.setUint8(offset+i, str.charCodeAt(i)); }
+
+  writeStr(0,'RIFF'); view.setUint32(4, 36+dataSize, true); writeStr(8,'WAVE');
+  writeStr(12,'fmt '); view.setUint32(16,16,true); view.setUint16(20,1,true);
+  view.setUint16(22,numChannels,true); view.setUint32(24,sampleRate,true);
+  view.setUint32(28,sampleRate*blockAlign,true); view.setUint16(32,blockAlign,true);
+  view.setUint16(34,bytesPerSample*8,true);
+  writeStr(36,'data'); view.setUint32(40,dataSize,true);
+
+  const channels = [];
+  for(let c=0;c<numChannels;c++) channels.push(audioBuffer.getChannelData(c));
+  let offset = 44;
+  for(let i=0;i<numFrames;i++){
+    for(let c=0;c<numChannels;c++){
+      const s = Math.max(-1, Math.min(1, channels[c][i]));
+      view.setInt16(offset, s < 0 ? s*0x8000 : s*0x7FFF, true);
+      offset += 2;
+    }
+  }
+  return new Blob([buf], {type:'audio/wav'});
+}
+
+async function renderToWav(steps){
+  if(isRendering) return;
+  isRendering = true;
+  const statusEl = document.getElementById('exportStatus');
+  if(statusEl) statusEl.textContent = 'Rendering ' + steps + ' steps…';
+
+  try{
+    const sr = 44100;
+    const stepDur = stepDuration();
+    const duration = steps * stepDur + 0.5; // small tail for the last note's release/reverb-free decay
+    const offlineCtx = new (window.OfflineAudioContext||window.webkitOfflineAudioContext)(1, Math.ceil(sr*duration), sr);
+
+    const offMaster = offlineCtx.createGain(); offMaster.gain.value = 0.9;
+    const offLimiter = offlineCtx.createDynamicsCompressor();
+    offLimiter.threshold.value=-6; offLimiter.knee.value=10; offLimiter.ratio.value=8;
+    offLimiter.attack.value=0.003; offLimiter.release.value=0.25;
+    offMaster.connect(offLimiter); offLimiter.connect(offlineCtx.destination);
+
+    // Snapshot the current knob values -- automation mutates this local copy
+    // only, never the live `params`, so exporting never disturbs playback.
+    const p = {...params};
+    const voice = buildVoiceGraph(offlineCtx, offMaster, p);
+    const noiseBuf = buildNoiseBuffer(offlineCtx);
+    const prevActiveRef = {value:false};
+
+    for(let i=0;i<steps;i++){
+      const t = i*stepDur;
+      applyAutomationForStep(i, p, voice, t, false);
+      playPatternStep(i, t, p, voice, offlineCtx, offMaster, noiseBuf, prevActiveRef);
+    }
+
+    const rendered = await offlineCtx.startRendering();
+
+    // Safety pass: extreme automation (very high resonance especially) can
+    // produce brief peaks the compressor's attack time doesn't catch in time,
+    // causing real hard clipping in the file. Normalize to a consistent peak
+    // and run a gentle tanh curve as a hard ceiling, so an exported file is
+    // never actually clipped no matter how wild the automation gets.
+    const data = rendered.getChannelData(0);
+    let peak = 0;
+    for(let i=0;i<data.length;i++){ const a = Math.abs(data[i]); if(a>peak) peak=a; }
+    if(peak > 0){
+      const targetPeak = 0.9;
+      const gain = targetPeak / peak;
+      const driveAmt = 1.15;
+      const norm = Math.tanh(driveAmt);
+      for(let i=0;i<data.length;i++){ data[i] = Math.tanh(data[i]*gain*driveAmt) / norm; }
+    }
+
+    const blob = encodeWav(rendered);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+    a.href = url;
+    a.download = 'acid-machine-' + steps + 'steps-' + stamp + '.wav';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 4000);
+
+    if(statusEl) statusEl.textContent = 'Saved ' + steps + '-step WAV (' + duration.toFixed(1) + 's).';
+  } catch(err){
+    if(statusEl) statusEl.textContent = 'Export failed: ' + err.message;
+  } finally {
+    isRendering = false;
+  }
 }
 
 function uiLoop(){
@@ -648,11 +910,12 @@ function highlightStep(i){
 
 // ---------------------------------------------------------------- knob factory
 function clamp(v,mn,mx){ return Math.max(mn,Math.min(mx,v)); }
-function makeKnob(id, {min,max,value,onChange,format}){
+function makeKnob(id, {min,max,value,onChange,format,default:defaultVal}){
   const el = document.getElementById(id);
   const ind = el.querySelector('.ind');
   const valEl = document.getElementById('val-'+id.replace('knob-',''));
   let val = value;
+  const resetVal = defaultVal !== undefined ? defaultVal : value;
   function render(){
     const pct = (val-min)/(max-min);
     const angle = -135 + pct*270;
@@ -665,9 +928,10 @@ function makeKnob(id, {min,max,value,onChange,format}){
     render();
     onChange(val);
   }
-  let dragging=false, startY=0, startVal=0;
+  let dragging=false, startY=0, startVal=0, lastTapTime=0, moved=false;
   function down(e){
     dragging=true;
+    moved=false;
     startY = e.touches ? e.touches[0].clientY : e.clientY;
     startVal = val;
     e.preventDefault();
@@ -675,10 +939,28 @@ function makeKnob(id, {min,max,value,onChange,format}){
   function move(e){
     if(!dragging) return;
     const y = e.touches ? e.touches[0].clientY : e.clientY;
+    if(Math.abs(startY-y) > 2) moved = true;
     setFromDelta(startY-y, startVal);
     e.preventDefault();
   }
-  function up(){ dragging=false; }
+  function up(){
+    // A "tap" is a down+up with no real drag in between. Two clean taps
+    // within the window reset to default; an actual drag never counts
+    // toward this, so dragging then quickly tapping elsewhere can't
+    // accidentally trigger a reset.
+    if(dragging && !moved){
+      const now = Date.now();
+      if(now - lastTapTime < 350){
+        lastTapTime = 0;
+        val = resetVal;
+        render();
+        onChange(val);
+      } else {
+        lastTapTime = now;
+      }
+    }
+    dragging=false;
+  }
   el.addEventListener('mousedown', down);
   window.addEventListener('mousemove', move);
   window.addEventListener('mouseup', up);
@@ -690,39 +972,40 @@ function makeKnob(id, {min,max,value,onChange,format}){
   return {set:(v)=>{val=v;render();onChange(val);}};
 }
 
-makeKnob('knob-bpm', {min:70,max:180,value:params.bpm, format:v=>Math.round(v),
+const knobRefs = {};
+knobRefs.bpm = makeKnob('knob-bpm', {min:70,max:180,value:params.bpm, default:DEFAULT_PARAMS.bpm, format:v=>Math.round(v),
   onChange:v=>{ params.bpm=Math.round(v); }});
-makeKnob('knob-tune', {min:-12,max:12,value:params.tune, format:v=>Math.round(v),
+knobRefs.tune = makeKnob('knob-tune', {min:PARAM_RANGES.tune.min,max:PARAM_RANGES.tune.max,value:params.tune, default:DEFAULT_PARAMS.tune, format:v=>Math.round(v),
   onChange:v=>{ params.tune=Math.round(v); }});
-makeKnob('knob-accent', {min:0,max:1,value:params.accent, format:v=>Math.round(v*100)+'%',
+knobRefs.accent = makeKnob('knob-accent', {min:PARAM_RANGES.accent.min,max:PARAM_RANGES.accent.max,value:params.accent, default:DEFAULT_PARAMS.accent, format:v=>Math.round(v*100)+'%',
   onChange:v=>{ params.accent=v; }});
-makeKnob('knob-drive', {min:0,max:1,value:params.drive, format:v=>Math.round(v*100)+'%',
-  onChange:v=>{ params.drive=v; if(driveShaper) driveShaper.curve = makeDriveCurve(v); if(drivePre) drivePre.gain.value = 1 + v*3; }});
-makeKnob('knob-freq', {min:60,max:6000,value:params.cutoff, format:v=>Math.round(v)+'Hz',
+knobRefs.drive = makeKnob('knob-drive', {min:0,max:1,value:params.drive, default:DEFAULT_PARAMS.drive, format:v=>Math.round(v*100)+'%',
+  onChange:v=>{ params.drive=v; if(liveVoice){ liveVoice.driveShaper.curve = makeDriveCurve(v); liveVoice.drivePre.gain.value = 1 + v*3; } }});
+knobRefs.cutoff = makeKnob('knob-freq', {min:PARAM_RANGES.cutoff.min,max:PARAM_RANGES.cutoff.max,value:params.cutoff, default:DEFAULT_PARAMS.cutoff, format:v=>Math.round(v)+'Hz',
   onChange:v=>{ params.cutoff=v; refreshFilterNow(); }});
-makeKnob('knob-reso', {min:0.5,max:26,value:params.reso, format:v=>v.toFixed(1),
-  onChange:v=>{ params.reso=v; if(filterNode) filterNode.Q.value=v; }});
-makeKnob('knob-mix', {min:0,max:1,value:params.mix, format:v=>Math.round(v*100)+'%',
-  onChange:v=>{ params.mix=v; if(dryGain){ dryGain.gain.value=1-v; wetGain.gain.value=v; } }});
-makeKnob('knob-attack', {min:0.001,max:0.15,value:params.attack, format:v=>Math.round(v*1000)+'ms',
+knobRefs.reso = makeKnob('knob-reso', {min:PARAM_RANGES.reso.min,max:PARAM_RANGES.reso.max,value:params.reso, default:DEFAULT_PARAMS.reso, format:v=>v.toFixed(1),
+  onChange:v=>{ params.reso=v; if(liveVoice) liveVoice.filterNode.Q.value=v; }});
+knobRefs.mix = makeKnob('knob-mix', {min:PARAM_RANGES.mix.min,max:PARAM_RANGES.mix.max,value:params.mix, default:DEFAULT_PARAMS.mix, format:v=>Math.round(v*100)+'%',
+  onChange:v=>{ params.mix=v; if(liveVoice){ liveVoice.dryGain.gain.value=1-v; liveVoice.wetGain.gain.value=v; } }});
+knobRefs.attack = makeKnob('knob-attack', {min:PARAM_RANGES.attack.min,max:PARAM_RANGES.attack.max,value:params.attack, default:DEFAULT_PARAMS.attack, format:v=>Math.round(v*1000)+'ms',
   onChange:v=>{ params.attack=v; }});
-makeKnob('knob-decay', {min:0.02,max:0.8,value:params.decay, format:v=>Math.round(v*1000)+'ms',
+knobRefs.decay = makeKnob('knob-decay', {min:PARAM_RANGES.decay.min,max:PARAM_RANGES.decay.max,value:params.decay, default:DEFAULT_PARAMS.decay, format:v=>Math.round(v*1000)+'ms',
   onChange:v=>{ params.decay=v; }});
-makeKnob('knob-sustain', {min:0,max:1,value:params.sustain, format:v=>Math.round(v*100)+'%',
+knobRefs.sustain = makeKnob('knob-sustain', {min:PARAM_RANGES.sustain.min,max:PARAM_RANGES.sustain.max,value:params.sustain, default:DEFAULT_PARAMS.sustain, format:v=>Math.round(v*100)+'%',
   onChange:v=>{ params.sustain=v; }});
-makeKnob('knob-release', {min:0.02,max:0.5,value:params.release, format:v=>Math.round(v*1000)+'ms',
+knobRefs.release = makeKnob('knob-release', {min:PARAM_RANGES.release.min,max:PARAM_RANGES.release.max,value:params.release, default:DEFAULT_PARAMS.release, format:v=>Math.round(v*1000)+'ms',
   onChange:v=>{ params.release=v; }});
-makeKnob('knob-depth', {min:0,max:1,value:params.depth, format:v=>Math.round(v*100)+'%',
+knobRefs.depth = makeKnob('knob-depth', {min:PARAM_RANGES.depth.min,max:PARAM_RANGES.depth.max,value:params.depth, default:DEFAULT_PARAMS.depth, format:v=>Math.round(v*100)+'%',
   onChange:v=>{ params.depth=v; }});
 
 const genKnobs = {
-  density: makeKnob('knob-density', {min:0.1,max:1,value:genParams.density, format:v=>Math.round(v*100)+'%',
+  density: makeKnob('knob-density', {min:0.1,max:1,value:genParams.density, default:DEFAULT_GEN_PARAMS.density, format:v=>Math.round(v*100)+'%',
     onChange:v=>{ genParams.density=v; }}),
-  slides: makeKnob('knob-slides', {min:0,max:1,value:genParams.slides, format:v=>Math.round(v*100)+'%',
+  slides: makeKnob('knob-slides', {min:0,max:1,value:genParams.slides, default:DEFAULT_GEN_PARAMS.slides, format:v=>Math.round(v*100)+'%',
     onChange:v=>{ genParams.slides=v; }}),
-  accents: makeKnob('knob-accents', {min:0,max:1,value:genParams.accents, format:v=>Math.round(v*100)+'%',
+  accents: makeKnob('knob-accents', {min:0,max:1,value:genParams.accents, default:DEFAULT_GEN_PARAMS.accents, format:v=>Math.round(v*100)+'%',
     onChange:v=>{ genParams.accents=v; }}),
-  octjump: makeKnob('knob-octjump', {min:0,max:1,value:genParams.octjump, format:v=>Math.round(v*100)+'%',
+  octjump: makeKnob('knob-octjump', {min:0,max:1,value:genParams.octjump, default:DEFAULT_GEN_PARAMS.octjump, format:v=>Math.round(v*100)+'%',
     onChange:v=>{ genParams.octjump=v; }})
 };
 
@@ -732,15 +1015,16 @@ document.getElementById('waveGroup').addEventListener('click', e=>{
   document.querySelectorAll('#waveGroup button').forEach(x=>x.classList.remove('active'));
   b.classList.add('active');
   params.wave = b.dataset.v;
-  if(osc) osc.type = params.wave;
+  if(liveVoice) liveVoice.osc.type = params.wave;
 });
 document.getElementById('filterTypeGroup').addEventListener('click', e=>{
   const b = e.target.closest('button'); if(!b) return;
   document.querySelectorAll('#filterTypeGroup button').forEach(x=>x.classList.remove('active'));
   b.classList.add('active');
   params.filterType = b.dataset.v;
-  if(filterNode){ filterNode.type = params.filterType; refreshFilterNow(); }
+  if(liveVoice){ liveVoice.filterNode.type = params.filterType; refreshFilterNow(); }
 });
+
 
 // ---------------------------------------------------------------- sequencer UI
 function noteLabel(degreeIndex){
@@ -825,6 +1109,133 @@ renderAcidRow();
 renderDrumRow('kickRow','kick','KICK','kick');
 renderDrumRow('clapRow','clap','CLAP','clap');
 renderDrumRow('hatRow','hat','HAT','hat');
+
+// ---------------------------------------------------------------- automation UI
+// Kept deliberately simple: pick a param from the tab row, draw its lane by
+// dragging across the canvas, flip the checkbox on to make it actually apply.
+// One editor, reused for whichever param is selected -- not eleven separate
+// mini-graphs cluttering the knob panels.
+
+function autoCanvasGeometry(){
+  const canvas = document.getElementById('autoCanvas');
+  const w = canvas.width, h = canvas.height;
+  const barGap = 3;
+  const barW = (w - barGap*(numSteps-1)) / numSteps;
+  return { canvas, w, h, barGap, barW };
+}
+
+function drawAutoCanvas(){
+  const { canvas, w, h, barGap, barW } = autoCanvasGeometry();
+  const g = canvas.getContext('2d');
+  if(!g) return;
+  g.clearRect(0,0,w,h);
+  g.fillStyle = '#101018';
+  g.fillRect(0,0,w,h);
+
+  const lane = automation[automationEditKey];
+  const col = lane.enabled ? ACID : '#4a4d5c';
+
+  for(let i=0;i<numSteps;i++){
+    const x = i*(barW+barGap);
+    // faint full-height guide so empty steps are still tappable targets
+    g.fillStyle = 'rgba(255,255,255,.04)';
+    g.fillRect(x, 0, barW, h);
+
+    const v = lane.values[i];
+    const barH = Math.max(3, v*h);
+    g.fillStyle = col;
+    g.globalAlpha = lane.enabled ? 1 : 0.5;
+    g.fillRect(x, h-barH, barW, barH);
+    g.globalAlpha = 1;
+
+    if(i % 4 === 0){
+      g.fillStyle = 'rgba(255,255,255,.15)';
+      g.fillRect(x, 0, 2, h);
+    }
+  }
+  // centre reference line (0.5)
+  g.strokeStyle = 'rgba(255,255,255,.12)';
+  g.beginPath(); g.moveTo(0,h/2); g.lineTo(w,h/2); g.stroke();
+}
+
+function renderAutoTabs(){
+  const el = document.getElementById('autoTabs');
+  el.innerHTML = '';
+  AUTOMATABLE.forEach(key => {
+    const b = document.createElement('button');
+    b.textContent = PARAM_RANGES[key].label;
+    b.className = (key === automationEditKey ? 'active ' : '') + (automation[key].enabled ? 'has-lane' : '');
+    b.addEventListener('click', () => {
+      automationEditKey = key;
+      renderAutoTabs();
+      updateAutoControls();
+      drawAutoCanvas();
+    });
+    el.appendChild(b);
+  });
+}
+
+function updateAutoControls(){
+  const lane = automation[automationEditKey];
+  document.getElementById('autoEnable').checked = lane.enabled;
+  document.getElementById('autoEnableLabel').textContent = 'on for ' + PARAM_RANGES[automationEditKey].label.toUpperCase();
+}
+
+document.getElementById('autoEnable').addEventListener('change', e=>{
+  automation[automationEditKey].enabled = e.target.checked;
+  renderAutoTabs();
+  drawAutoCanvas();
+});
+document.getElementById('autoClearBtn').addEventListener('click', ()=>{
+  const lane = automation[automationEditKey];
+  lane.values = new Array(16).fill(0.5);
+  lane.enabled = false;
+  renderAutoTabs();
+  updateAutoControls();
+  drawAutoCanvas();
+});
+
+// drag-to-draw on the automation canvas
+(function(){
+  const canvas = document.getElementById('autoCanvas');
+  let drawing = false;
+
+  function paintAt(clientX, clientY){
+    const rect = canvas.getBoundingClientRect();
+    const { w, h, barGap, barW } = autoCanvasGeometry();
+    const scaleX = w / rect.width, scaleY = h / rect.height;
+    const x = (clientX - rect.left) * scaleX;
+    const y = (clientY - rect.top) * scaleY;
+    let idx = Math.floor(x / (barW+barGap));
+    idx = Math.max(0, Math.min(numSteps-1, idx));
+    const norm = Math.max(0, Math.min(1, 1 - y/h));
+    automation[automationEditKey].values[idx] = norm;
+    drawAutoCanvas();
+  }
+  function down(e){
+    drawing = true;
+    const p = e.touches ? e.touches[0] : e;
+    paintAt(p.clientX, p.clientY);
+    e.preventDefault();
+  }
+  function move(e){
+    if(!drawing) return;
+    const p = e.touches ? e.touches[0] : e;
+    paintAt(p.clientX, p.clientY);
+    e.preventDefault();
+  }
+  function up(){ drawing = false; }
+  canvas.addEventListener('mousedown', down);
+  window.addEventListener('mousemove', move);
+  window.addEventListener('mouseup', up);
+  canvas.addEventListener('touchstart', down, {passive:false});
+  canvas.addEventListener('touchmove', move, {passive:false});
+  window.addEventListener('touchend', up);
+})();
+
+renderAutoTabs();
+updateAutoControls();
+drawAutoCanvas();
 
 // ---------------------------------------------------------------- pattern generator
 // Encodes common acid conventions: notes anchor to the root on strong beats,
@@ -1408,6 +1819,50 @@ document.getElementById('lenBtn').addEventListener('click', ()=>{
   renderDrumRow('kickRow','kick','KICK','kick');
   renderDrumRow('clapRow','clap','CLAP','clap');
   renderDrumRow('hatRow','hat','HAT','hat');
+  drawAutoCanvas();
+});
+
+// ---- reset all: knobs back to defaults, automation cleared
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  Object.assign(params, DEFAULT_PARAMS);
+
+  Object.keys(knobRefs).forEach(key => {
+    if(DEFAULT_PARAMS[key] !== undefined) knobRefs[key].set(DEFAULT_PARAMS[key]);
+  });
+
+  document.querySelectorAll('#waveGroup button').forEach(b => b.classList.toggle('active', b.dataset.v === DEFAULT_PARAMS.wave));
+  document.querySelectorAll('#filterTypeGroup button').forEach(b => b.classList.toggle('active', b.dataset.v === DEFAULT_PARAMS.filterType));
+  if(liveVoice){
+    liveVoice.osc.type = params.wave;
+    liveVoice.filterNode.type = params.filterType;
+    liveVoice.filterNode.Q.value = params.reso;
+    liveVoice.driveShaper.curve = makeDriveCurve(params.drive);
+    liveVoice.drivePre.gain.value = 1 + params.drive*3;
+    liveVoice.dryGain.gain.value = 1-params.mix;
+    liveVoice.wetGain.gain.value = params.mix;
+    refreshFilterNow();
+  }
+
+  AUTOMATABLE.forEach(key => { automation[key] = { enabled:false, values:new Array(16).fill(0.5) }; });
+  renderAutoTabs();
+  updateAutoControls();
+  drawAutoCanvas();
+});
+
+// ---- WAV export
+let exportSteps = 16;
+document.getElementById('exportLengths').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('#exportLengths button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  exportSteps = parseInt(b.dataset.v, 10);
+});
+document.getElementById('exportBtn').addEventListener('click', async ()=>{
+  if(!ctx) initAudio(); // OfflineAudioContext doesn't need the live ctx, but this keeps behaviour predictable
+  const btn = document.getElementById('exportBtn');
+  btn.disabled = true;
+  await renderToWav(exportSteps);
+  btn.disabled = false;
 });
 
 document.getElementById('playBtn').addEventListener('click', async ()=>{
@@ -1415,7 +1870,7 @@ document.getElementById('playBtn').addEventListener('click', async ()=>{
   if(ctx.state==='suspended') await ctx.resume();
   const btn = document.getElementById('playBtn');
   if(!isPlaying){
-    isPlaying = true; currentStep = 0; nextStepTime = ctx.currentTime+0.05; prevAcidActive=false;
+    isPlaying = true; currentStep = 0; nextStepTime = ctx.currentTime+0.05; livePrevRef.value=false;
     stepQueue = [];
     scheduler();
     requestAnimationFrame(uiLoop);
@@ -1423,10 +1878,11 @@ document.getElementById('playBtn').addEventListener('click', async ()=>{
   } else {
     isPlaying = false; clearTimeout(timerID);
     btn.textContent = 'PLAY'; btn.classList.remove('on');
-    if(ampGain){ ampGain.gain.cancelScheduledValues(ctx.currentTime); ampGain.gain.setTargetAtTime(0, ctx.currentTime, 0.03); }
+    if(liveVoice){ liveVoice.ampGain.gain.cancelScheduledValues(ctx.currentTime); liveVoice.ampGain.gain.setTargetAtTime(0, ctx.currentTime, 0.03); }
     document.querySelectorAll('.note-btn.playing, .drum-cell.playing').forEach(el=>el.classList.remove('playing'));
   }
 });
 </script>
 </body>
 </html>
+
