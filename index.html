@@ -294,6 +294,20 @@
     box-shadow:0 0 8px rgba(var(--acid-rgb),.25);
   }
 
+  .scope-beats{
+    display:flex; gap:5px; flex-wrap:wrap; justify-content:center; align-items:center;
+    margin-top:8px; padding-top:8px; border-top:1px solid #1c2015;
+  }
+  .scope-beats-label{ font-size:10px; letter-spacing:1px; color:#5c6650; font-weight:700; margin-right:2px; }
+  .scope-beats button{
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:11px;
+    padding:6px 9px; border-radius:7px; border:1px solid #2b3320;
+    background:#161a12; color:#7d8a62; cursor:pointer;
+  }
+  .scope-beats button.active{
+    background:linear-gradient(180deg,#4a63d6,#2c3d9c); color:#fff; border-color:#5a72e0;
+  }
+
   #resetBtn{
     font-family:'Orbitron',sans-serif; font-weight:700; font-size:10px; letter-spacing:1px;
     padding:10px 10px; border-radius:10px; border:1px solid #4a2b2b;
@@ -344,14 +358,14 @@
         <div class="knob-value" id="val-bpm">128</div>
       </div>
       <button id="themeBtn" title="theme color"><span class="theme-dot" id="themeDot"></span>THEME</button>
-      <button id="scopeBtn" title="oscilloscope">SCOPE</button>
+      <button id="scopeBtn" title="oscilloscope" class="on">SCOPE</button>
       <button id="lenBtn">16</button>
       <button id="resetBtn" title="reset all knobs and automation">RESET</button>
       <button id="playBtn">PLAY</button>
     </div>
   </header>
 
-  <div class="panel scope-panel" id="scopePanel">
+  <div class="panel scope-panel on" id="scopePanel">
     <canvas id="scopeCanvas" width="1000" height="220"></canvas>
     <div class="scope-types" id="scopeTypes">
       <button data-v="wave" class="active">Wave</button>
@@ -363,6 +377,13 @@
       <button data-v="lissajous">XY</button>
       <button data-v="waterfall">Waterfall</button>
       <button data-v="meter">Levels</button>
+    </div>
+    <div class="scope-beats" id="scopeBeatsRow">
+      <span class="scope-beats-label">window:</span>
+      <button data-v="1">1 beat</button>
+      <button data-v="2" class="active">2 beats</button>
+      <button data-v="4">4 beats</button>
+      <button data-v="8">8 beats</button>
     </div>
   </div>
 
@@ -637,6 +658,35 @@ function initAudio(){
   master.connect(limiter);
   limiter.connect(analyser);
   limiter.connect(ctx.destination);
+
+  // Rolling raw-sample buffer for the "beats" time window. AnalyserNode's
+  // time-domain buffer is hard-capped at 32768 samples (~0.74s @ 44.1kHz),
+  // which is less than even 1 beat at most of our BPM range -- not enough
+  // for a real multi-beat scope. This captures actual output samples into
+  // a longer circular buffer instead. It's tapped through a silent (gain 0)
+  // side path, not inserted into the audible chain, so it adds zero latency
+  // and can't affect what you actually hear.
+  const ringSeconds = 13; // covers the worst case: 8 beats at the slowest (40bpm) tempo
+  ringBuffer = new Float32Array(Math.ceil(ringSeconds * ctx.sampleRate));
+  ringWritePos = 0;
+  const tapSize = 4096;
+  scopeTap = ctx.createScriptProcessor(tapSize, 1, 1);
+  scopeTap.onaudioprocess = (e) => {
+    const inp = e.inputBuffer.getChannelData(0);
+    const len = ringBuffer.length;
+    if (ringWritePos + inp.length <= len) {
+      ringBuffer.set(inp, ringWritePos);
+    } else {
+      const first = len - ringWritePos;
+      ringBuffer.set(inp.subarray(0, first), ringWritePos);
+      ringBuffer.set(inp.subarray(first), 0);
+    }
+    ringWritePos = (ringWritePos + inp.length) % len;
+  };
+  const scopeSilent = ctx.createGain(); scopeSilent.gain.value = 0;
+  limiter.connect(scopeTap);
+  scopeTap.connect(scopeSilent);
+  scopeSilent.connect(ctx.destination);
 
   liveVoice = buildVoiceGraph(ctx, master, params);
   noiseBuffer = buildNoiseBuffer(ctx);
@@ -1490,10 +1540,36 @@ renderBank();
 
 
 // ---- oscilloscope
-let scopeOn = false, scopeRAF = null, scopeData = null, freqData = null;
+let scopeOn = true, scopeRAF = null, scopeData = null, freqData = null;
 let scopeType = 'wave';
 let waterfall = null;   // offscreen canvas for the scrolling spectrogram
 let peakHold = [];      // per-band peaks for the level meter
+
+let ringBuffer = null, ringWritePos = 0, scopeTap = null;
+const BEAT_OPTIONS = [1, 2, 4, 8];
+let scopeBeats = 2;
+
+// Returns the most recent `seconds` of raw samples from the ring buffer, in
+// chronological order (oldest first) -- typed-array copies only, no
+// per-sample loop, so this stays fast even for an 8-beat window.
+function getRingWindow(seconds){
+  if(!ringBuffer || !ctx) return new Float32Array(0);
+  const len = ringBuffer.length;
+  let n = Math.min(Math.round(seconds * ctx.sampleRate), len);
+  if(n <= 0) return new Float32Array(0);
+  const out = new Float32Array(n);
+  const end = ringWritePos;
+  let start = end - n;
+  if(start >= 0){
+    out.set(ringBuffer.subarray(start, end));
+  } else {
+    const wrapStart = len + start;
+    const tailLen = len - wrapStart;
+    out.set(ringBuffer.subarray(wrapStart, len), 0);
+    out.set(ringBuffer.subarray(0, end), tailLen);
+  }
+  return out;
+}
 
 // Theme colors -- these are `let`, not `const`, because the theme toggle
 // reassigns them, and the canvas draw functions read whatever they currently
@@ -1567,18 +1643,32 @@ function scopeBg(g,w,h){
 }
 
 function drawWave(g,w,h,mirror,filled){
-  analyser.getByteTimeDomainData(scopeData);
-  const n = scopeData.length;
+  const seconds = scopeBeats * 60 / params.bpm;
+  const samples = getRingWindow(seconds);
+  const n = samples.length;
   g.strokeStyle = ACID_DIM; g.lineWidth = 2;
   g.beginPath(); g.moveTo(0,h/2); g.lineTo(w,h/2); g.stroke();
+  if(n < 2) return;
 
-  const pathY = i => (1 - (scopeData[i]-128)/128) * (h/2);
+  // A multi-beat window can be hundreds of thousands of raw samples -- draw
+  // a min/max envelope per pixel column (how every real waveform display
+  // works) rather than one lineTo per sample, so it stays fast and still
+  // shows transients instead of aliasing them away.
+  const cols = Math.max(1, Math.min(w, 900));
+  const mins = new Float32Array(cols), maxs = new Float32Array(cols);
+  for(let c=0;c<cols;c++){
+    const s0 = Math.floor(c*n/cols), s1 = Math.max(s0+1, Math.floor((c+1)*n/cols));
+    let mn=1, mx=-1;
+    for(let i=s0;i<s1;i++){ const v=samples[i]; if(v<mn)mn=v; if(v>mx)mx=v; }
+    mins[c]=mn; maxs[c]=mx;
+  }
+  const yTop = c => (1-maxs[c])*(h/2), yBot = c => (1-mins[c])*(h/2);
 
   if(filled){
     g.beginPath();
     g.moveTo(0,h/2);
-    for(let i=0;i<n;i++) g.lineTo((i/(n-1))*w, pathY(i));
-    g.lineTo(w,h/2);
+    for(let c=0;c<cols;c++) g.lineTo((c/(cols-1))*w, yTop(c));
+    for(let c=cols-1;c>=0;c--) g.lineTo((c/(cols-1))*w, yBot(c));
     g.closePath();
     const grad = g.createLinearGradient(0,0,0,h);
     grad.addColorStop(0,rgba(.55));
@@ -1586,21 +1676,23 @@ function drawWave(g,w,h,mirror,filled){
     g.fillStyle = grad; g.fill();
   }
 
-  g.lineWidth = 3; g.strokeStyle = ACID;
-  g.shadowColor = rgba(.85); g.shadowBlur = 12;
+  g.lineWidth = 2; g.strokeStyle = ACID;
+  g.shadowColor = rgba(.85); g.shadowBlur = 10;
   g.beginPath();
-  for(let i=0;i<n;i++){
-    const x=(i/(n-1))*w, y=pathY(i);
-    if(i===0) g.moveTo(x,y); else g.lineTo(x,y);
+  for(let c=0;c<cols;c++){
+    const x = (c/(cols-1))*w;
+    g.moveTo(x, yTop(c));
+    g.lineTo(x, yBot(c));
   }
   g.stroke();
 
   if(mirror){
     g.strokeStyle = rgba(.45);
     g.beginPath();
-    for(let i=0;i<n;i++){
-      const x=(i/(n-1))*w, y=h-pathY(i);
-      if(i===0) g.moveTo(x,y); else g.lineTo(x,y);
+    for(let c=0;c<cols;c++){
+      const x = (c/(cols-1))*w;
+      g.moveTo(x, h-yTop(c));
+      g.lineTo(x, h-yBot(c));
     }
     g.stroke();
   }
@@ -1652,16 +1744,18 @@ function drawBars(g,w,h){
 }
 
 function drawRadial(g,w,h){
-  analyser.getByteTimeDomainData(scopeData);
+  const seconds = scopeBeats * 60 / params.bpm;
+  const raw = getRingWindow(seconds);
   const cx=w/2, cy=h/2, base=Math.min(w,h)*0.26, n=256;
   g.strokeStyle=rgba(.18); g.lineWidth=2;
   g.beginPath(); g.arc(cx,cy,base,0,Math.PI*2); g.stroke();
+  if(raw.length < 2) return;
   g.lineWidth=3; g.strokeStyle=ACID;
   g.shadowColor=rgba(.8); g.shadowBlur=12;
   g.beginPath();
   for(let i=0;i<=n;i++){
-    const idx = Math.floor(i/n*(scopeData.length-1));
-    const amp = (scopeData[idx]-128)/128;
+    const idx = Math.floor(i/n*(raw.length-1));
+    const amp = raw[idx];
     const r = base + amp*base*0.9;
     const a = (i/n)*Math.PI*2 - Math.PI/2;
     const x = cx + Math.cos(a)*r, y = cy + Math.sin(a)*r;
@@ -1671,19 +1765,26 @@ function drawRadial(g,w,h){
 }
 
 function drawLissajous(g,w,h){
-  analyser.getByteTimeDomainData(scopeData);
-  const n = scopeData.length, lag = 96; // phase-shifted against itself
+  const seconds = scopeBeats * 60 / params.bpm;
+  const raw = getRingWindow(seconds);
+  const n = raw.length, lag = 96; // phase-shifted against itself
   const cx=w/2, cy=h/2, s=Math.min(w,h)*0.40;
   g.strokeStyle=rgba(.15); g.lineWidth=2;
   g.beginPath(); g.moveTo(cx-s,cy); g.lineTo(cx+s,cy);
   g.moveTo(cx,cy-s); g.lineTo(cx,cy+s); g.stroke();
+  if(n <= lag) return;
   g.lineWidth=2.5; g.strokeStyle=ACID;
   g.shadowColor=rgba(.8); g.shadowBlur=10;
   g.beginPath();
-  for(let i=0;i<n-lag;i++){
-    const a=(scopeData[i]-128)/128, b=(scopeData[i+lag]-128)/128;
+  // long windows can be hundreds of thousands of samples; a Lissajous figure
+  // reads the same whether traced from every sample or a few thousand, so
+  // stride through it instead of visiting each one individually
+  const stride = Math.max(1, Math.floor((n-lag)/4000));
+  let first = true;
+  for(let i=0;i<n-lag;i+=stride){
+    const a=raw[i], b=raw[i+lag];
     const x=cx+a*s, y=cy-b*s;
-    if(i===0) g.moveTo(x,y); else g.lineTo(x,y);
+    if(first){ g.moveTo(x,y); first=false; } else { g.lineTo(x,y); }
   }
   g.stroke(); g.shadowBlur=0;
 }
@@ -1789,6 +1890,13 @@ document.getElementById('scopeTypes').addEventListener('click', e=>{
   waterfall = null; // reset the scrolling history when switching in
 });
 
+document.getElementById('scopeBeatsRow').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('#scopeBeatsRow button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  scopeBeats = parseInt(b.dataset.v, 10);
+});
+
 document.getElementById('scopeBtn').addEventListener('click', ()=>{
   scopeOn = !scopeOn;
   const panel = document.getElementById('scopePanel');
@@ -1802,6 +1910,10 @@ document.getElementById('scopeBtn').addEventListener('click', ()=>{
     if(scopeRAF){ cancelAnimationFrame(scopeRAF); scopeRAF = null; }
   }
 });
+
+// scope is on by default -- start the draw loop right away (it just shows
+// the "press play" placeholder until audio actually starts)
+if(scopeOn) drawScope();
 
 // ---- theme color toggle
 document.getElementById('themeBtn').addEventListener('click', ()=>{
