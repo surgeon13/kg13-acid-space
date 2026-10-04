@@ -34,10 +34,15 @@ Web Audio API, nothing is fetched except the two fonts.
   accent.
 - **Drum machine**: kick, clap, hats, independently sequenced.
 - **💨 Secret fart mode**: tap the 💨 button in the header to turn the machine into a
-  Fart Machine — brown skin, no tempo or sequencer, just 10 fart types (poot, brap,
-  long, squeak, rumble, wet, burst, balloon, silent-but-deadly, epic) on tappable
-  pads, Pitch / Length / Wetness / Rattle knobs, 🎲 Surprise Me, a toilet echo,
-  and "save the last 12 seconds as WAV". Tap 💨 again to go back to acid.
+  Fart Machine — brown skin, no tempo or sequencer. Three TB-303-style oscillators
+  (LOW / MID / HIGH), each with saw or square, cutoff, resonance, ADSR and a
+  drawable pitch editor (±4 octaves), plus shared flap / wobble / wetness / squelch
+  / drive. Hold a pad to sustain. 8 presets, 🎲 Surprise Me, toilet echo, and
+  "save the last 12 seconds as WAV". Tap 💨 again to go back to acid.
+- **MIDI export**: "Download MIDI" writes the current pattern as a .mid file
+  (format 1: tempo track, acid line, drums on channel 10). Accents are louder notes,
+  slides are overlapping legato notes, and enabled cutoff / reso / attack / release
+  automation lanes are written as CC 74 / 71 / 73 / 72. Drag it into Ableton.
 - **Pattern generator**: 6 styles (Classic 88, Rolling, Screamer, Minimal,
   Dubby, Chaos) × 5 scales (Phrygian, Minor, Minor Pentatonic, Harmonic
   Minor, Chromatic) — rule-based, not random noise: notes anchor to the root
