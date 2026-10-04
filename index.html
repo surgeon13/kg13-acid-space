@@ -478,7 +478,7 @@
     </div>
     <div id="fartVoices"></div>
     <div class="panel">
-      <h4>FLAP &amp; GRIT — shared by all three</h4>
+      <h4>GRIT — what makes it a fart · shared by all three</h4>
       <div class="row" id="fartGlobalA"></div>
       <div class="row" id="fartGlobalB"></div>
       <div class="fart-toggles">
@@ -955,111 +955,119 @@ function scheduler(){
 }
 
 // ---------------------------------------------------------------- fart engine
-// Three TB-303-style voices (LOW / MID / HIGH). Each one is the same signal
-// path as the acid voice -- osc (saw or square) -> drive -> resonant lowpass ->
-// amp, with an ADSR on both amp and cutoff -- plus a pitch contour you draw
-// (+/- 4 octaves). What turns a bassline into a fart is the shared "flap":
-// an irregular amplitude flutter, a random pitch wobble and a little breath.
+// Three TB-303-style voices (LOW / MID / HIGH). Each is the acid signal path --
+// oscillator -> drive -> resonant lowpass -> amp, with an ADSR on amp and
+// cutoff -- but the oscillator is a *flapping* oscillator instead of a clean
+// saw/square: a real fart is a sphincter opening and closing, so the source is
+// a train of separate airflow puffs. Every puff gets its own random timing
+// (jitter), loudness (shimmer) and chance of dropping out (sputter), with
+// breath noise riding on each puff and a slow random pitch drift. That
+// cycle-to-cycle irregularity is the thing a normal oscillator lacks.
+// SAW = a sharp puff with a long decay, SQR = a flat, blunt puff.
 const FART_VOICE_NAMES = ['LOW','MID','HIGH'];
 const FART_BASE = [55, 165, 495];        // Hz at contour value 0
-const FART_FLAP_MUL = [0.8, 1.2, 1.8];   // higher voices flap faster
 const FART_GAIN = 0.3;
+const FART_MAX_HOLD = 4;                 // seconds a held pad can sound
 
 const fartCfg = {
-  glob: { flap:.6, rate:34, wobble:.4, wet:.3, squelch:.5, drive:.25 },
+  glob: { jitter:.5, shimmer:.5, sputter:.25, breath:.3, wobble:.4, squelch:.4, drive:.2 },
   voices: [0,1,2].map(()=>({ on:true, wave:'sawtooth', cutoff:600, reso:4, level:.7, time:1,
                              a:.01, d:.3, s:.6, r:.15, curve:[0,0,0,0,0,0,0,0] }))
 };
 const FART_PRESETS = [
-  { name:'Classic', glob:{flap:.6,rate:34,wobble:.4,wet:.3,squelch:.5,drive:.25}, voices:[
-    {on:true, wave:'sawtooth',cutoff:380, reso:4, level:.8, time:1.0,a:.01, d:.4, s:.6,r:.15,curve:[4,3,2,0,-3,-6,-9,-12]},
-    {on:true, wave:'sawtooth',cutoff:900, reso:6, level:.5, time:.9, a:.01, d:.35,s:.5,r:.15,curve:[7,5,3,0,-4,-8,-12,-14]},
-    {on:true, wave:'square',  cutoff:1800,reso:8, level:.3, time:.8, a:.01, d:.3, s:.4,r:.12,curve:[14,12,10,6,3,0,-4,-8]}]},
-  { name:'Poot', glob:{flap:.1,rate:40,wobble:.2,wet:.15,squelch:.4,drive:.2}, voices:[
-    {on:true, wave:'sawtooth',cutoff:600, reso:3, level:.9, time:.16,a:.004,d:.09,s:0,r:.05,curve:[3,2,0,-2,-4,-5,-6,-7]},
-    {on:true, wave:'sawtooth',cutoff:1100,reso:4, level:.5, time:.14,a:.004,d:.08,s:0,r:.05,curve:[5,3,1,-1,-3,-5,-6,-8]},
-    {on:false,wave:'square',  cutoff:1800,reso:6, level:.2, time:.14,a:.004,d:.08,s:0,r:.05,curve:[8,6,4,2,0,-2,-4,-6]}]},
-  { name:'Long', glob:{flap:.7,rate:30,wobble:.5,wet:.35,squelch:.5,drive:.25}, voices:[
-    {on:true, wave:'sawtooth',cutoff:420, reso:4, level:.9, time:1.8,a:.03,d:.6,s:.55,r:.3,curve:[2,1,0,-2,-5,-9,-13,-18]},
-    {on:true, wave:'sawtooth',cutoff:800, reso:5, level:.5, time:1.6,a:.03,d:.6,s:.5, r:.3,curve:[6,4,2,0,-4,-9,-13,-17]},
-    {on:true, wave:'square',  cutoff:1500,reso:6, level:.25,time:1.4,a:.04,d:.5,s:.4, r:.3,curve:[12,10,8,4,0,-4,-8,-12]}]},
-  { name:'Squeaky', glob:{flap:.2,rate:50,wobble:.15,wet:.1,squelch:.6,drive:.15}, voices:[
-    {on:false,wave:'sawtooth',cutoff:400, reso:3, level:.3, time:.8,a:.01,d:.3,s:.5,r:.15,curve:[0,0,0,0,0,0,0,0]},
-    {on:true, wave:'square',  cutoff:1600,reso:6, level:.3, time:.8,a:.01,d:.3,s:.5,r:.15,curve:[0,3,6,8,6,2,-2,-6]},
-    {on:true, wave:'square',  cutoff:2800,reso:10,level:.8, time:.9,a:.01,d:.3,s:.6,r:.15,curve:[-6,-1,5,9,11,9,3,-5]}]},
-  { name:'Rumble', glob:{flap:.8,rate:18,wobble:.6,wet:.5,squelch:.4,drive:.35}, voices:[
-    {on:true, wave:'sawtooth',cutoff:220, reso:2, level:1.0,time:2.2,a:.06,d:.8,s:.8,r:.6,curve:[0,-1,-2,-4,-6,-8,-10,-14]},
-    {on:true, wave:'sawtooth',cutoff:320, reso:3, level:.3, time:2.0,a:.06,d:.8,s:.7,r:.6,curve:[2,0,-2,-4,-7,-10,-13,-16]},
-    {on:false,wave:'square',  cutoff:900, reso:3, level:.1, time:2.0,a:.06,d:.8,s:.5,r:.6,curve:[0,0,0,0,0,0,0,0]}]},
-  { name:'Brap', glob:{flap:.95,rate:24,wobble:.5,wet:.2,squelch:.5,drive:.3}, voices:[
-    {on:true, wave:'sawtooth',cutoff:500, reso:4, level:.9, time:1.2,a:.005,d:.2,s:.85,r:.1,curve:[3,2,1,0,-1,-3,-5,-8]},
-    {on:true, wave:'sawtooth',cutoff:1000,reso:5, level:.5, time:1.0,a:.005,d:.2,s:.8, r:.1,curve:[6,4,3,1,-1,-3,-6,-9]},
-    {on:true, wave:'square',  cutoff:1800,reso:6, level:.2, time:.9, a:.005,d:.2,s:.7, r:.1,curve:[10,8,6,4,2,0,-3,-6]}]},
-  { name:'Wet', glob:{flap:.85,rate:52,wobble:.8,wet:1,squelch:.5,drive:.3}, voices:[
-    {on:true, wave:'sawtooth',cutoff:500, reso:5, level:.8, time:1.0,a:.02,d:.4,s:.6,r:.2,curve:[3,2,0,-2,-4,-7,-10,-13]},
-    {on:true, wave:'sawtooth',cutoff:950, reso:6, level:.5, time:.9, a:.02,d:.4,s:.5,r:.2,curve:[6,4,2,0,-3,-6,-9,-12]},
-    {on:true, wave:'square',  cutoff:1700,reso:8, level:.2, time:.8, a:.02,d:.3,s:.4,r:.2,curve:[9,7,5,3,1,-1,-4,-7]}]},
-  { name:'Balloon', glob:{flap:.1,rate:60,wobble:.1,wet:0,squelch:.6,drive:.1}, voices:[
-    {on:false,wave:'sawtooth',cutoff:400, reso:3, level:.3, time:1.2,a:.02,d:.4,s:.6,r:.2,curve:[0,0,0,0,0,0,0,0]},
-    {on:true, wave:'square',  cutoff:1400,reso:6, level:.5, time:1.2,a:.02,d:.4,s:.7,r:.25,curve:[0,6,10,12,8,2,-6,-14]},
-    {on:true, wave:'square',  cutoff:2600,reso:9, level:.6, time:1.2,a:.02,d:.4,s:.7,r:.25,curve:[8,14,18,18,12,4,-6,-18]}]}
+  { name:'Classic', glob:{jitter:.5,shimmer:.5,sputter:.25,breath:.3,wobble:.4,squelch:.4,drive:.35}, voices:[
+    {on:true, wave:'sawtooth',cutoff:1180, reso:4, level:.9, time:1.2,a:.006,d:.5, s:.6, r:.2, curve:[10,9,7,5,2,-1,-4,-7]},
+    {on:true, wave:'sawtooth',cutoff:2240, reso:5, level:.75,time:1.0,a:.006,d:.4, s:.5, r:.2, curve:[4,3,1,-1,-4,-7,-10,-13]},
+    {on:true, wave:'square',  cutoff:4200,reso:5, level:.2, time:.9, a:.006,d:.3, s:.4, r:.15,curve:[-6,-4,-2,-4,-8,-12,-16,-20]}]},
+  { name:'Poot', glob:{jitter:.3,shimmer:.3,sputter:0,breath:.2,wobble:.2,squelch:.4,drive:.2}, voices:[
+    {on:true, wave:'sawtooth',cutoff:1210, reso:3, level:.7, time:.16,a:.003,d:.1, s:0,r:.04,curve:[12,10,8,6,4,2,0,-2]},
+    {on:true, wave:'sawtooth',cutoff:2200,reso:4, level:.8, time:.15,a:.003,d:.09,s:0,r:.04,curve:[2,1,0,-2,-4,-5,-6,-7]},
+    {on:false,wave:'square',  cutoff:3300,reso:4, level:.2, time:.15,a:.003,d:.09,s:0,r:.04,curve:[-4,-5,-6,-7,-8,-9,-10,-11]}]},
+  { name:'Long', glob:{jitter:.55,shimmer:.5,sputter:.3,breath:.35,wobble:.5,squelch:.4,drive:.35}, voices:[
+    {on:true, wave:'sawtooth',cutoff:1120, reso:4, level:.9, time:2.6,a:.02,d:.9,s:.6,r:.35,curve:[8,8,7,6,4,1,-3,-9]},
+    {on:true, wave:'sawtooth',cutoff:1960, reso:5, level:.75, time:2.4,a:.02,d:.8,s:.5,r:.35,curve:[3,3,2,0,-3,-7,-12,-18]},
+    {on:true, wave:'square',  cutoff:3360,reso:5, level:.2, time:2.2,a:.03,d:.7,s:.4,r:.3, curve:[0,0,-2,-5,-9,-14,-20,-26]}]},
+  { name:'Squeaky', glob:{jitter:.12,shimmer:.2,sputter:0,breath:.1,wobble:.2,squelch:.5,drive:.1}, voices:[
+    {on:false,wave:'sawtooth',cutoff:520, reso:3, level:.3, time:.8,a:.01,d:.3,s:.5,r:.15,curve:[0,0,0,0,0,0,0,0]},
+    {on:true, wave:'square',  cutoff:2340,reso:6, level:.45,time:.9,a:.01,d:.3,s:.6,r:.15,curve:[6,10,14,16,16,12,6,0]},
+    {on:true, wave:'square',  cutoff:3640,reso:8, level:.6, time:.9,a:.01,d:.3,s:.6,r:.15,curve:[2,6,10,12,12,8,2,-4]}]},
+  { name:'Rumble', glob:{jitter:.7,shimmer:.6,sputter:.35,breath:.35,wobble:.5,squelch:.3,drive:.3}, voices:[
+    {on:true, wave:'sawtooth',cutoff:360, reso:2, level:1.0,time:3.0,a:.05,d:1.0,s:.8,r:.6,curve:[4,3,2,0,-2,-5,-9,-14]},
+    {on:true, wave:'sawtooth',cutoff:580, reso:3, level:.3, time:3.0,a:.05,d:1.0,s:.7,r:.6,curve:[0,-1,-3,-6,-9,-12,-16,-20]},
+    {on:false,wave:'square',  cutoff:1440, reso:3, level:.1, time:3.0,a:.05,d:1.0,s:.5,r:.6,curve:[-6,-8,-10,-12,-14,-16,-18,-20]}]},
+  { name:'Brap', glob:{jitter:.6,shimmer:.6,sputter:.2,breath:.25,wobble:.3,squelch:.4,drive:.3}, voices:[
+    {on:true, wave:'sawtooth',cutoff:1540, reso:4, level:.9, time:1.4,a:.004,d:.3,s:.85,r:.1,curve:[-2,-2,-3,-3,-4,-5,-6,-8]},
+    {on:true, wave:'sawtooth',cutoff:1980, reso:4, level:.4, time:1.2,a:.004,d:.3,s:.8, r:.1,curve:[-12,-12,-13,-14,-15,-16,-18,-20]},
+    {on:false,wave:'square',  cutoff:3300,reso:4, level:.2, time:1.0,a:.004,d:.3,s:.7, r:.1,curve:[-16,-16,-17,-18,-19,-20,-22,-24]}]},
+  { name:'Wet', glob:{jitter:.7,shimmer:.8,sputter:.7,breath:.55,wobble:.7,squelch:.5,drive:.35}, voices:[
+    {on:true, wave:'sawtooth',cutoff:1060, reso:6, level:.9, time:1.6,a:.01,d:.5,s:.6,r:.25,curve:[9,8,6,4,1,-2,-6,-10]},
+    {on:true, wave:'sawtooth',cutoff:1960, reso:7, level:.75, time:1.4,a:.01,d:.5,s:.5,r:.25,curve:[3,2,0,-2,-5,-8,-12,-16]},
+    {on:true, wave:'square',  cutoff:3360,reso:6, level:.2, time:1.2,a:.01,d:.4,s:.4,r:.2, curve:[-2,-3,-5,-8,-11,-14,-18,-22]}]},
+  { name:'Balloon', glob:{jitter:.08,shimmer:.15,sputter:0,breath:.1,wobble:.1,squelch:.5,drive:.1}, voices:[
+    {on:false,wave:'sawtooth',cutoff:520, reso:3, level:.3, time:1.2,a:.02,d:.4,s:.6,r:.2,curve:[0,0,0,0,0,0,0,0]},
+    {on:true, wave:'square',  cutoff:2080,reso:6, level:.5, time:1.4,a:.02,d:.4,s:.7,r:.25,curve:[0,6,10,12,8,2,-6,-14]},
+    {on:true, wave:'square',  cutoff:3380,reso:8, level:.55,time:1.4,a:.02,d:.4,s:.7,r:.25,curve:[-4,2,6,8,4,-2,-10,-18]}]}
 ];
 
 function fartCurveFreq(base, curve, u){
-  const x = u*(curve.length-1), i0 = Math.min(curve.length-2, Math.floor(x)), fr = x-i0;
+  const x = clamp(u,0,1)*(curve.length-1), i0 = Math.min(curve.length-2, Math.floor(x)), fr = x-i0;
   const semis = curve[i0] + (curve[i0+1]-curve[i0])*fr;
   return clamp(base*Math.pow(2, semis/12), 18, 6000);
 }
 const fartCurveCache = {};
 function fartDriveCurve(d){ const k = Math.round(d*20); return fartCurveCache[k] || (fartCurveCache[k] = makeDriveCurve(k/20)); }
 
+// Renders the flapping oscillator for one voice into a buffer (sample by sample).
+function synthFartSource(sr, vi, v, g){
+  const N = Math.floor(sr*FART_MAX_HOLD), buf = new Float32Array(N);
+  const base = FART_BASE[vi], T = clamp(v.time,.08,3);
+  const gauss = ()=> (Math.random()+Math.random()+Math.random()+Math.random()-2)*1.732; // ~N(0,1)
+  const aDrift = 2*Math.PI*6/sr, sDrift = Math.sqrt(2*aDrift);   // ~6 Hz wander
+  const aDC = 2*Math.PI*15/sr;
+  let drift = 0, phase = 0, pf = 1, amp = 1, dc = 0, lp = 0, env = 0;
+  const square = v.wave === 'square';
+  for(let i=0;i<N;i++){
+    const t = i/sr, u = Math.min(1, t/T);
+    drift += -aDrift*drift + sDrift*gauss();
+    const f = fartCurveFreq(base, v.curve, u) * Math.pow(2, g.wobble*drift*.3);
+    phase += f*pf/sr;
+    if(phase >= 1){
+      phase -= Math.floor(phase);
+      // a new puff: pick its timing, loudness and whether it drops out.
+      // irregularity grows as the fart runs out of pressure
+      const grow = .6 + .8*u;
+      pf  = clamp(1 + g.jitter*grow*.5*gauss(), .45, 1.9);
+      amp = clamp(1 + g.shimmer*.5*gauss(), .15, 2);
+      if(Math.random() < g.sputter*(.25 + .75*u)*.5) amp *= .04;
+    }
+    // puff shape
+    let y;
+    if(square) y = phase < .22 ? 1 : 0;
+    else       y = Math.pow(1-phase, 5) * (1 - Math.exp(-phase*260));
+    env = y*amp;
+    y = env + g.breath*.6*Math.abs(env)*gauss();     // turbulence rides on the puff
+    lp += (y - lp)*.85;                              // soften the edges
+    dc += (lp - dc)*aDC;                             // remove DC
+    buf[i] = lp - dc;
+  }
+  let pk = 1e-6; for(let i=0;i<N;i++){ const a = Math.abs(buf[i]); if(a>pk) pk = a; }
+  const k = .9/pk; for(let i=0;i<N;i++) buf[i] *= k;
+  return buf;
+}
+
 // Starts one note on voice `vi` at time t and returns {release(t)}. The note
 // holds (sustain) until release() is called, like a key being held.
 function startFartNote(audioCtx, dest, noiseBuf, vi, t, cfg){
   const v = cfg.voices[vi], g = cfg.glob, out = { release(){} };
   if(!v.on) return out;
-  const base = FART_BASE[vi];
-
-  const osc = audioCtx.createOscillator(); osc.type = v.wave;
+  const data = synthFartSource(audioCtx.sampleRate, vi, v, g);
+  const ab = audioCtx.createBuffer(1, data.length, audioCtx.sampleRate); ab.getChannelData(0).set(data);
+  const src = audioCtx.createBufferSource(); src.buffer = ab;
   const pre = audioCtx.createGain(); pre.gain.value = 1 + g.drive*3;
   const shaper = audioCtx.createWaveShaper(); shaper.curve = fartDriveCurve(g.drive); shaper.oversample = '2x';
   const filt = audioCtx.createBiquadFilter(); filt.type = 'lowpass'; filt.Q.value = v.reso;
-  const modGain = audioCtx.createGain();
   const amp = audioCtx.createGain(); amp.gain.value = 0;
-  osc.connect(pre); pre.connect(shaper); shaper.connect(filt); filt.connect(modGain); modGain.connect(amp); amp.connect(dest);
-
-  // flap: triangle LFO chops the amplitude; slow noise makes it irregular
-  const depth = clamp(g.flap,0,1)*.9;
-  modGain.gain.value = 1 - depth/2;
-  const rate = g.rate*FART_FLAP_MUL[vi];
-  const lfo = audioCtx.createOscillator(); lfo.type = 'triangle'; lfo.frequency.value = rate;
-  const lfoAmt = audioCtx.createGain(); lfoAmt.gain.value = depth/2;
-  lfo.connect(lfoAmt); lfoAmt.connect(modGain.gain);
-
-  const off = Math.random()*.8;
-  const nsrc = audioCtx.createBufferSource(); nsrc.buffer = noiseBuf; nsrc.loop = true;
-  const wobLP = audioCtx.createBiquadFilter(); wobLP.type='lowpass'; wobLP.frequency.value = 14;
-  const wobG = audioCtx.createGain(); wobG.gain.value = 65*300*g.wobble;       // ~ +/-300 cents at full wobble
-  nsrc.connect(wobLP); wobLP.connect(wobG); wobG.connect(osc.detune);
-  const flLP = audioCtx.createBiquadFilter(); flLP.type='lowpass'; flLP.frequency.value = 22;
-  const flG = audioCtx.createGain(); flG.gain.value = 52*rate*.3*(g.flap>0?1:0);  // irregular flap rate
-  nsrc.connect(flLP); flLP.connect(flG); flG.connect(lfo.frequency);
-  const spLP = audioCtx.createBiquadFilter(); spLP.type='lowpass'; spLP.frequency.value = 30;
-  const spG = audioCtx.createGain(); spG.gain.value = 47*g.wet*.4;                 // wet sputter dips
-  nsrc.connect(spLP); spLP.connect(spG); spG.connect(modGain.gain);
-  nsrc.start(t, off);
-
-  // breath
-  const nsrc2 = audioCtx.createBufferSource(); nsrc2.buffer = noiseBuf; nsrc2.loop = true;
-  const bp = audioCtx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value = clamp(v.cutoff*1.2,150,5000); bp.Q.value = .8;
-  const ng = audioCtx.createGain(); ng.gain.value = g.wet*.14;
-  nsrc2.connect(bp); bp.connect(ng); ng.connect(modGain);
-  nsrc2.start(t, (off+.37)%.9);
-
-  // pitch contour (drawn in the pitch editor), then hold the last value
-  const T = clamp(v.time,.08,3), M = 48;
-  osc.frequency.setValueAtTime(fartCurveFreq(base, v.curve, 0), t);
-  for(let k=1;k<=M;k++) osc.frequency.linearRampToValueAtTime(fartCurveFreq(base, v.curve, k/M), t + T*k/M);
+  src.connect(pre); pre.connect(shaper); shaper.connect(filt); filt.connect(amp); amp.connect(dest);
 
   // ADSR on amp and on the cutoff (squelch = how far the envelope opens it)
   const A = Math.max(v.a,.002), D = Math.max(v.d,.01), S = clamp(v.s,0,1), peak = v.level*FART_GAIN;
@@ -1071,16 +1079,17 @@ function startFartNote(audioCtx, dest, noiseBuf, vi, t, cfg){
   filt.frequency.linearRampToValueAtTime(fPk, t+A);
   filt.frequency.linearRampToValueAtTime(fSus, t+A+D);
 
-  osc.start(t); lfo.start(t);
+  src.start(t);
+  let released = false;
   out.release = function(rt){
+    if(released) return; released = true;
     rt = Math.max(rt, t + A);
     const R = Math.max(v.r,.02);
     [[amp.gain,0],[filt.frequency,v.cutoff]].forEach(([p,target])=>{
       try{ p.cancelAndHoldAtTime(rt); }catch(e){ p.cancelScheduledValues(rt); }
       p.setTargetAtTime(target, rt, R/3);
     });
-    const end = rt + R*1.8 + .05;
-    [osc,lfo,nsrc,nsrc2].forEach(n=>{ try{ n.stop(end); }catch(e){} });
+    try{ src.stop(rt + R*1.8 + .05); }catch(e){}
   };
   return out;
 }
@@ -2251,10 +2260,11 @@ const VKNOBS = [
   ['r','Release',.02,1.5,v=>Math.round(v*1000)+'ms','r']
 ];
 const GKNOBS = [
-  ['flap','Flap',0,1,v=>Math.round(v*100)+'%'],
-  ['rate','Flap rate',8,80,v=>Math.round(v)+'Hz'],
+  ['jitter','Jitter',0,1,v=>Math.round(v*100)+'%'],
+  ['shimmer','Shimmer',0,1,v=>Math.round(v*100)+'%'],
+  ['sputter','Sputter',0,1,v=>Math.round(v*100)+'%'],
+  ['breath','Breath',0,1,v=>Math.round(v*100)+'%'],
   ['wobble','Wobble',0,1,v=>Math.round(v*100)+'%'],
-  ['wet','Wetness',0,1,v=>Math.round(v*100)+'%'],
   ['squelch','Squelch',0,1,v=>Math.round(v*100)+'%'],
   ['drive','Drive',0,1,v=>Math.round(v*100)+'%']
 ];
@@ -2314,8 +2324,8 @@ function setupPed(i){
       '<canvas class="fv-ped" id="fvPed'+i+'" width="720" height="240"></canvas>';
     box.appendChild(p);
   });
-  document.getElementById('fartGlobalA').innerHTML = GKNOBS.slice(0,3).map(k=>knobHtml('fg-'+k[0],k[1])).join('');
-  document.getElementById('fartGlobalB').innerHTML = GKNOBS.slice(3).map(k=>knobHtml('fg-'+k[0],k[1])).join('');
+  document.getElementById('fartGlobalA').innerHTML = GKNOBS.slice(0,4).map(k=>knobHtml('fg-'+k[0],k[1])).join('');
+  document.getElementById('fartGlobalB').innerHTML = GKNOBS.slice(4).map(k=>knobHtml('fg-'+k[0],k[1])).join('');
 
   FART_VOICE_NAMES.forEach((nm,i)=>{
     VKNOBS.forEach(k=>{
@@ -2394,12 +2404,12 @@ document.getElementById('fartEcho').addEventListener('click', e=>{
 document.getElementById('fartSurprise').addEventListener('click', ()=>{
   const rnd=(a,b)=>a+Math.random()*(b-a), pick=a=>a[Math.floor(Math.random()*a.length)];
   const g = fartCfg.glob;
-  g.flap = rnd(.1,1); g.rate = rnd(14,70); g.wobble = rnd(0,.9); g.wet = rnd(0,1); g.squelch = rnd(.2,.9); g.drive = rnd(0,.6);
+  g.jitter = rnd(.1,.9); g.shimmer = rnd(.1,.9); g.sputter = rnd(0,.8); g.breath = rnd(0,.7); g.wobble = rnd(0,.9); g.squelch = rnd(.2,.9); g.drive = rnd(0,.5);
   fartCfg.voices.forEach((v,i)=>{
     v.on = i===0 || Math.random()<.7; v.wave = pick(['sawtooth','square']);
-    v.cutoff = rnd(200,2500)*(i+1)*.7; v.reso = rnd(1,14); v.level = rnd(.3,.9); v.time = rnd(.15,2.2);
+    v.cutoff = rnd(180,900)*(i+1)*.8; v.reso = rnd(1,14); v.level = rnd(.3,.9); v.time = rnd(.15,2.2);
     v.a = rnd(.004,.08); v.d = rnd(.05,.8); v.s = rnd(0,.9); v.r = rnd(.05,.6);
-    let c = rnd(-6,12); v.curve = v.curve.map(()=>{ c = clamp(c + rnd(-9,5), -36, 30); return Math.round(c); });
+    let c = rnd(0,12); v.curve = v.curve.map(()=>{ c = clamp(c + rnd(-6,3), -30, 24); return Math.round(c); });
   });
   fartPresetIdx = -1; syncFartUI(); fartPlayAll(rnd(.3,1.4));
 });
