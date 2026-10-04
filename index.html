@@ -344,13 +344,63 @@
   #lenBtn.eight-on{ background:linear-gradient(180deg,#4a63d6,#2c3d9c); color:#fff; border-color:#5a72e0; }
 
   footer{ text-align:center; color:#55565f; font-size:10px; margin-top:10px; letter-spacing:.5px; }
+
+  /* ===== FART MODE ===== */
+  .fart-only{ display:none; }
+  html.fart-mode .fart-only{ display:block; }
+  html.fart-mode .acid-only{ display:none !important; }
+  html.fart-mode{
+    --bg:#1b1006; --panel-top:#44280f; --panel-bot:#2c1a09; --panel-border:#7a4c1f;
+    --knob-hi:#f0b070; --knob-lo:#4a2a10; --text:#f7e8d0; --dim:#c4a27a;
+  }
+  html.fart-mode body{ background:radial-gradient(ellipse at 50% 0%, #3a2108, #1b1006 70%); }
+  html.fart-mode .knob{ background:radial-gradient(circle at 34% 28%, var(--knob-hi), #a5642a 55%, var(--knob-lo) 100%); }
+  html.fart-mode .scope-beats button.active,
+  html.fart-mode #lenBtn.eight-on,
+  html.fart-mode .btngroup button.active,
+  html.fart-mode .scope-types button.active,
+  html.fart-mode #genStyles button.active,
+  html.fart-mode .export-lengths button.active{
+    background:linear-gradient(180deg,#e08a30,#8a4a14); color:#fff; border-color:#f0a050;
+  }
+  #fartBtn{
+    font-size:16px; line-height:1; padding:8px 9px; border-radius:10px; border:1px solid #3a3b47;
+    background:#1c1d25; cursor:pointer; filter:grayscale(.7); opacity:.8;
+  }
+  #fartBtn.on{ filter:none; opacity:1; background:linear-gradient(180deg,#e08a30,#8a4a14); border-color:#f0a050; box-shadow:0 0 14px rgba(240,160,80,.6); }
+  .fart-pads{ display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:12px; }
+  .fart-pad{
+    position:relative; overflow:hidden; min-height:62px; padding:6px 2px; border-radius:12px;
+    border:1px solid #7a4c1f; background:linear-gradient(180deg,#5a3815,#35200b); color:var(--text);
+    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:11px; letter-spacing:.5px; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+  }
+  .fart-pad .em{ font-size:20px; line-height:1; }
+  .fart-pad:active{ transform:scale(.94); }
+  .fart-pad.sel{ border-color:#ffc070; box-shadow:0 0 12px rgba(255,170,70,.65), inset 0 0 0 1px #ffc070; background:linear-gradient(180deg,#8a5420,#4a2a0c); }
+  .fart-pad .puff{ position:absolute; left:50%; top:30%; font-size:22px; pointer-events:none; animation:puffUp .8s ease-out forwards; }
+  @keyframes puffUp{ from{ transform:translate(-50%,0) scale(.6); opacity:.95; } to{ transform:translate(calc(-50% + var(--dx,0px)),-46px) scale(1.8); opacity:0; } }
+  .fart-toggles{ display:flex; gap:8px; justify-content:center; margin-top:10px; }
+  .fart-toggles button{
+    font-family:'Orbitron',sans-serif; font-weight:700; font-size:10px; letter-spacing:1px; padding:10px 12px; border-radius:10px;
+    border:1px solid #7a4c1f; background:#35200b; color:var(--dim); cursor:pointer;
+  }
+  .fart-toggles button.active{ background:linear-gradient(180deg,#e08a30,#8a4a14); color:#fff; border-color:#f0a050; }
+  @keyframes shakeIt{ 0%,100%{ transform:translate(0,0); } 20%{ transform:translate(-3px,2px) rotate(-.3deg); } 40%{ transform:translate(3px,-2px) rotate(.3deg); } 60%{ transform:translate(-2px,-1px); } 80%{ transform:translate(2px,2px); } }
+  #app.shake{ animation:shakeIt .12s linear 6; }
+  #fartToast{
+    position:fixed; left:50%; top:16px; transform:translateX(-50%) translateY(-60px); z-index:99;
+    background:#2c1a09; color:#ffd9a0; border:1px solid #f0a050; border-radius:12px; padding:10px 16px;
+    font-family:'Orbitron',sans-serif; font-weight:700; font-size:11px; letter-spacing:1px; transition:transform .25s; pointer-events:none; white-space:nowrap;
+  }
+  #fartToast.show{ transform:translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
 
 <div class="app sixteen" id="app">
   <header>
-    <div class="title">ACID MACHINE<small>tb-303 style mono synth</small></div>
+    <div class="title" id="appTitle">ACID MACHINE<small>tb-303 style mono synth</small></div>
     <div class="transport">
       <div class="knob-wrap">
         <div class="knob" id="knob-bpm"><div class="ind"></div></div>
@@ -361,6 +411,7 @@
       <button id="scopeBtn" title="oscilloscope" class="on">SCOPE</button>
       <button id="lenBtn">16</button>
       <button id="resetBtn" title="reset all knobs and automation">RESET</button>
+      <button id="fartBtn" title="???">💨</button>
       <button id="playBtn">PLAY</button>
     </div>
   </header>
@@ -387,7 +438,22 @@
     </div>
   </div>
 
-  <div class="panel">
+  <div class="panel fart-only" id="fartPanel">
+    <h4>FART GENERATOR — tap a pad to toot · the pad you tap is what the sequencer plays</h4>
+    <div class="fart-pads" id="fartPads"></div>
+    <div class="row">
+      <div class="knob-wrap"><div class="knob" id="knob-fpitch"><div class="ind"></div></div><div class="knob-label">Pitch</div><div class="knob-value" id="val-fpitch">0</div></div>
+      <div class="knob-wrap"><div class="knob" id="knob-flen"><div class="ind"></div></div><div class="knob-label">Length</div><div class="knob-value" id="val-flen">1.0x</div></div>
+      <div class="knob-wrap"><div class="knob" id="knob-fwet"><div class="ind"></div></div><div class="knob-label">Wetness</div><div class="knob-value" id="val-fwet">30%</div></div>
+      <div class="knob-wrap"><div class="knob" id="knob-frattle"><div class="ind"></div></div><div class="knob-label">Rattle</div><div class="knob-value" id="val-frattle">20%</div></div>
+    </div>
+    <div class="fart-toggles">
+      <button id="fartRandom">🎲 RANDOM</button>
+      <button id="fartDrums" class="active">🥁 DRUMS</button>
+    </div>
+  </div>
+
+  <div class="panel acid-only">
     <h4>OSC</h4>
     <div class="row">
       <div class="btngroup" id="waveGroup">
@@ -400,7 +466,7 @@
     </div>
   </div>
 
-  <div class="panel">
+  <div class="panel acid-only">
     <h4>FILTER</h4>
     <div class="row">
       <div class="btngroup" id="filterTypeGroup">
@@ -414,7 +480,7 @@
     </div>
   </div>
 
-  <div class="panel">
+  <div class="panel acid-only">
     <h4>ENV</h4>
     <div class="row">
       <div class="knob-wrap"><div class="knob" id="knob-attack"><div class="ind"></div></div><div class="knob-label">Attack</div><div class="knob-value" id="val-attack">4ms</div></div>
@@ -425,7 +491,7 @@
     </div>
   </div>
 
-  <div class="panel auto-panel">
+  <div class="panel auto-panel acid-only">
     <h4>AUTOMATION</h4>
     <p class="auto-hint">pick a knob, then draw its value across the steps — loops with the pattern</p>
     <div class="auto-tabs" id="autoTabs"></div>
@@ -479,7 +545,7 @@
   </div>
 
   <div class="seq-section">
-    <h3>ACID SEQUENCE — tap note to turn on/off · ▲▼ picks the note · O = octave · dots = accent / slide</h3>
+    <h3 id="acidSeqTitle">ACID SEQUENCE — tap note to turn on/off · ▲▼ picks the note · O = octave · dots = accent / slide</h3>
     <div class="grid-scroll">
       <div class="acid-row" id="acidRow"></div>
     </div>
@@ -583,6 +649,11 @@ const state = {
     hat:  [true,false,true,false, true,false,true,false, true,false,true,false, true,false,true,false]
   }
 };
+
+// ---------------------------------------------------------------- fart mode state
+let fartMode = false;
+const DEFAULT_FART = {pitch:0, len:1, wet:0.3, rattle:0.2};
+const fartParams = {...DEFAULT_FART, type:'poot', random:false, drums:true};
 
 // ---------------------------------------------------------------- audio engine
 let ctx=null, master=null, limiter=null, analyser=null;
@@ -817,15 +888,25 @@ function playPatternStep(i, t, p, voice, audioCtx, dest, noiseBuf, prevActiveRef
   const s = state.acid[idx];
   if(s.active){
     const semi = DEGREES[s.degreeIndex];
-    if(s.slide && prevActiveRef.value){ slideAcidNote(p, voice, t, semi, s.octave); }
-    else { triggerAcidNote(p, voice, t, semi, s.octave, dur, s.accent); }
-    prevActiveRef.value = true;
+    if(fartMode){
+      const type = fartParams.random ? pickRandomFart(s.accent) : fartParams.type;
+      triggerFart(audioCtx, dest, noiseBuf, t, {
+        type, len: fartParams.len * (s.accent ? 1.35 : 1), wet: fartParams.wet, rattle: fartParams.rattle,
+        semis: fartParams.pitch + semi + s.octave*12, level: s.accent ? 1.3 : 1
+      });
+      prevActiveRef.value = false;
+    } else {
+      if(s.slide && prevActiveRef.value){ slideAcidNote(p, voice, t, semi, s.octave); }
+      else { triggerAcidNote(p, voice, t, semi, s.octave, dur, s.accent); }
+      prevActiveRef.value = true;
+    }
   } else {
     prevActiveRef.value = false;
   }
-  if(state.drums.kick[idx]) triggerKick(audioCtx, dest, t);
-  if(state.drums.clap[idx]) triggerClap(audioCtx, dest, noiseBuf, t);
-  if(state.drums.hat[idx])  triggerHat(audioCtx, dest, noiseBuf, t);
+  const drumsOn = !fartMode || fartParams.drums;
+  if(drumsOn && state.drums.kick[idx]) triggerKick(audioCtx, dest, t);
+  if(drumsOn && state.drums.clap[idx]) triggerClap(audioCtx, dest, noiseBuf, t);
+  if(drumsOn && state.drums.hat[idx])  triggerHat(audioCtx, dest, noiseBuf, t);
 }
 
 function scheduleStep(i,t){
@@ -841,6 +922,88 @@ function scheduler(){
     currentStep = (currentStep+1)%numSteps;
   }
   timerID = setTimeout(scheduler, 25);
+}
+
+// ---------------------------------------------------------------- fart engine
+// Each fart is two slightly detuned sawtooth oscillators + noise, through a
+// resonant lowpass, with a randomly jittering stepped pitch, a falling pitch
+// and cutoff, and random "sputter" dips -- that irregularity is what reads as
+// organic. Composite types (brap, burst, epic) schedule several of these.
+const FART_TYPES = {
+  poot:    {name:'Poot',    em:'💨', f0:190, f1:115, dur:.17, c0:900,  c1:480,  q:4, noise:.22, jit:.10, sput:0,   atk:.004, lvl:1},
+  brap:    {name:'Brap',    em:'🎺', parts:[[0,'poot',1.00,.7],[.11,'poot',.92,.65],[.21,'poot',.84,.95]]},
+  long:    {name:'Long',    em:'🚂', f0:98,  f1:58,  dur:1.3,  c0:700,  c1:330,  q:5, noise:.30, jit:.16, sput:.22, atk:.03,  lvl:1, vib:.035, vibHz:22},
+  squeak:  {name:'Squeak',  em:'🐭', f0:560, f1:390, dur:.7,   c0:2400, c1:1500, q:9, noise:.10, jit:.03, sput:.05, atk:.01,  lvl:.8, vib:.02, vibHz:30},
+  rumble:  {name:'Rumble',  em:'🌋', f0:52,  f1:34,  dur:1.8,  c0:320,  c1:150,  q:3, noise:.40, jit:.25, sput:.32, atk:.06,  lvl:1.1},
+  wet:     {name:'Wet',     em:'💦', f0:112, f1:80,  dur:.9,   c0:1300, c1:560,  q:7, noise:.65, jit:.30, sput:.55, atk:.02,  lvl:.95},
+  burst:   {name:'Burst',   em:'💥', parts:[0,.07,.14,.21,.28,.35].map((o,i)=>[o,'poot',1-i*.07,.45])},
+  balloon: {name:'Balloon', em:'🎈', f0:300, f1:230, dur:1.0,  c0:2000, c1:1000, q:8, noise:.15, jit:.05, sput:.08, atk:.02,  lvl:.8, arc:1.2, vib:.03, vibHz:34},
+  sbd:     {name:'Silent but deadly', em:'🤫', f0:215, f1:170, dur:1.4, c0:1800, c1:900, q:3, noise:.9, jit:.14, sput:.35, atk:.2, lvl:.22},
+  epic:    {name:'EPIC',    em:'👑', parts:[[0,'rumble',1,1.0],[.5,'wet',1,.9],[1.1,'brap',1,1],[1.7,'long',1,1.1]]}
+};
+const FART_ORDER = ['poot','brap','long','squeak','rumble','wet','burst','balloon','sbd','epic'];
+const FART_RANDOM_POOL = ['poot','poot','poot','brap','long','squeak','rumble','wet','burst','balloon','sbd'];
+function pickRandomFart(accent){
+  if(accent && Math.random()<.4) return 'epic';
+  return FART_RANDOM_POOL[Math.floor(Math.random()*FART_RANDOM_POOL.length)];
+}
+
+function triggerFart(audioCtx, dest, noiseBuf, t, spec){
+  const prof = FART_TYPES[spec.type] || FART_TYPES.poot;
+  const len = spec.len || 1, level = spec.level === undefined ? 1 : spec.level;
+  if(prof.parts){
+    prof.parts.forEach(([off,type,lv,dm])=>{
+      triggerFart(audioCtx, dest, noiseBuf, t + off*len, {...spec, type, level: level*lv, len: len*dm});
+    });
+    return;
+  }
+  const wet = clamp(spec.wet===undefined?.3:spec.wet,0,1), rattle = clamp(spec.rattle||0,0,1);
+  const pm = Math.pow(2,(spec.semis||0)/12);
+  const dur = clamp(prof.dur*len, .05, 3);
+  const STEP = 0.014, n = Math.max(2, Math.round(dur/STEP));
+  const jit = prof.jit*(1+wet), sput = clamp(prof.sput + wet*.35, 0, .9);
+  const peak = 0.5*level*prof.lvl;
+
+  const filt = audioCtx.createBiquadFilter(); filt.type='lowpass'; filt.Q.value=prof.q;
+  const amp = audioCtx.createGain(); amp.gain.value = 0;
+  filt.connect(amp); amp.connect(dest);
+  const mix = audioCtx.createGain(); mix.gain.value = 1; mix.connect(filt);
+  const oscs = [1,1.012].map(det=>{
+    const o = audioCtx.createOscillator(); o.type='sawtooth';
+    const g = audioCtx.createGain(); g.gain.value = .5;
+    o.connect(g); g.connect(mix); o.start(t); o.stop(t+dur+.1);
+    return o;
+  });
+  const nsrc = audioCtx.createBufferSource(); nsrc.buffer = noiseBuf; nsrc.loop = true;
+  const nf = audioCtx.createBiquadFilter(); nf.type='bandpass'; nf.Q.value=.7;
+  const ng = audioCtx.createGain(); ng.gain.value = 0;
+  nsrc.connect(nf); nf.connect(ng); ng.connect(amp);
+  nsrc.start(t); nsrc.stop(t+dur+.1);
+
+  const nAmt = prof.noise*(1+wet*1.4);
+  let gate = 1;
+  amp.gain.setValueAtTime(0, t);
+  for(let k=0;k<=n;k++){
+    const u = k/n, tk = t + k*STEP;
+    let f = prof.f0*Math.pow(prof.f1/prof.f0, u);
+    if(prof.arc) f *= 1 + prof.arc*Math.sin(Math.PI*Math.min(1,u*1.1))*.9*(1-u*.4);
+    if(prof.vib) f *= 1 + prof.vib*Math.sin(2*Math.PI*prof.vibHz*k*STEP);
+    f *= 1 + (Math.random()-.5)*2*jit;
+    f = clamp(f*pm, 20, 4000);
+    oscs[0].frequency.linearRampToValueAtTime(f, tk);
+    oscs[1].frequency.linearRampToValueAtTime(f*1.012, tk);
+    const cut = clamp(prof.c0*Math.pow(prof.c1/prof.c0,u)*(1.25-wet*.5)*Math.sqrt(pm), 60, 9000);
+    filt.frequency.linearRampToValueAtTime(cut, tk);
+    nf.frequency.linearRampToValueAtTime(clamp(cut*1.2,200,6000), tk);
+    // envelope: quick attack, long body, falling tail
+    const env = Math.min(1, (k*STEP)/Math.max(prof.atk,.002)) * (1 - Math.pow(u,3));
+    if(Math.random() < sput*.35) gate = .12 + Math.random()*.2; else gate += (1-gate)*.6;
+    let a = env*gate;
+    if(rattle>0 && k%2===1) a *= 1 - rattle*.7;
+    amp.gain.linearRampToValueAtTime(a*peak, tk);
+    ng.gain.linearRampToValueAtTime(nAmt, tk);
+  }
+  amp.gain.linearRampToValueAtTime(0, t+dur+.03);
 }
 
 // ---------------------------------------------------------------- WAV export
@@ -884,7 +1047,7 @@ async function renderToWav(steps){
   try{
     const sr = 44100;
     const stepDur = stepDuration();
-    const duration = steps * stepDur + 0.5; // small tail for the last note's release/reverb-free decay
+    const duration = steps * stepDur + (fartMode ? 5.5 : 0.5); // tail for the last note's release (farts ring out longer)
     const offlineCtx = new (window.OfflineAudioContext||window.webkitOfflineAudioContext)(1, Math.ceil(sr*duration), sr);
 
     const offMaster = offlineCtx.createGain(); offMaster.gain.value = 0.9;
@@ -924,18 +1087,29 @@ async function renderToWav(steps){
       for(let i=0;i<data.length;i++){ data[i] = Math.tanh(data[i]*gain*driveAmt) / norm; }
     }
 
-    const blob = encodeWav(rendered);
+    let outBuf = rendered, outDur = duration;
+    if(fartMode){
+      // trim the silent tail but keep at least the pattern length, with a short fade
+      let last = 0;
+      for(let i=data.length-1;i>=0;i--){ if(Math.abs(data[i])>0.003){ last=i; break; } }
+      const n = Math.min(data.length, Math.max(Math.ceil(steps*stepDur*sr), last+Math.ceil(sr*.05)));
+      const fade = Math.min(n, Math.ceil(sr*.02));
+      for(let i=0;i<fade;i++) data[n-1-i] *= i/fade;
+      outBuf = { numberOfChannels:1, sampleRate:sr, length:n, getChannelData:()=>data.subarray(0,n) };
+      outDur = n/sr;
+    }
+    const blob = encodeWav(outBuf);
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     const stamp = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
     a.href = url;
-    a.download = 'acid-machine-' + steps + 'steps-' + stamp + '.wav';
+    a.download = (fartMode ? 'fart-machine-' : 'acid-machine-') + steps + 'steps-' + stamp + '.wav';
     document.body.appendChild(a);
     a.click();
     a.remove();
     setTimeout(()=>URL.revokeObjectURL(url), 4000);
 
-    if(statusEl) statusEl.textContent = 'Saved ' + steps + '-step WAV (' + duration.toFixed(1) + 's).';
+    if(statusEl) statusEl.textContent = 'Saved ' + steps + '-step WAV (' + outDur.toFixed(1) + 's).';
   } catch(err){
     if(statusEl) statusEl.textContent = 'Export failed: ' + err.message;
   } finally {
@@ -1968,6 +2142,87 @@ document.getElementById('resetBtn').addEventListener('click', ()=>{
   drawAutoCanvas();
 });
 
+// ---- FART MODE UI
+const fartKnobs = {};
+fartKnobs.pitch  = makeKnob('knob-fpitch',  {min:-12,max:12,value:0,default:0,format:v=>(v>0?'+':'')+Math.round(v),onChange:v=>{fartParams.pitch=Math.round(v);}});
+fartKnobs.len    = makeKnob('knob-flen',    {min:.4,max:2,value:1,default:1,format:v=>v.toFixed(1)+'x',onChange:v=>{fartParams.len=v;}});
+fartKnobs.wet    = makeKnob('knob-fwet',    {min:0,max:1,value:.3,default:.3,format:v=>Math.round(v*100)+'%',onChange:v=>{fartParams.wet=v;}});
+fartKnobs.rattle = makeKnob('knob-frattle', {min:0,max:1,value:.2,default:.2,format:v=>Math.round(v*100)+'%',onChange:v=>{fartParams.rattle=v;}});
+
+function liveFart(type){
+  if(!ctx) initAudio();
+  if(ctx.state==='suspended') ctx.resume();
+  triggerFart(ctx, master, noiseBuffer, ctx.currentTime+0.02, {
+    type, len:fartParams.len, wet:fartParams.wet, rattle:fartParams.rattle, semis:fartParams.pitch, level:1
+  });
+}
+function puff(pad){
+  for(let i=0;i<3;i++){
+    const s = document.createElement('span'); s.className='puff'; s.textContent='💨';
+    s.style.setProperty('--dx', ((Math.random()-.5)*50)+'px'); s.style.animationDelay = (i*.08)+'s';
+    pad.appendChild(s); setTimeout(()=>s.remove(), 1100);
+  }
+}
+function shakeApp(){
+  const a = document.getElementById('app'); a.classList.remove('shake'); void a.offsetWidth; a.classList.add('shake');
+  setTimeout(()=>a.classList.remove('shake'), 800);
+}
+function selectFartPad(type){
+  fartParams.type = type;
+  document.querySelectorAll('.fart-pad').forEach(p=>p.classList.toggle('sel', p.dataset.v===type));
+}
+(function buildFartPads(){
+  const box = document.getElementById('fartPads');
+  FART_ORDER.forEach(key=>{
+    const f = FART_TYPES[key];
+    const b = document.createElement('button'); b.className='fart-pad'; b.dataset.v=key;
+    b.innerHTML = '<span class="em">'+f.em+'</span><span>'+(key==='sbd'?'SBD':f.name.toUpperCase())+'</span>';
+    b.title = f.name;
+    b.addEventListener('pointerdown', e=>{
+      e.preventDefault();
+      selectFartPad(key); liveFart(key); puff(b);
+      if(key==='rumble'||key==='epic') shakeApp();
+    });
+    box.appendChild(b);
+  });
+  selectFartPad('poot');
+})();
+document.getElementById('fartRandom').addEventListener('click', e=>{
+  fartParams.random = !fartParams.random; e.currentTarget.classList.toggle('active', fartParams.random);
+});
+document.getElementById('fartDrums').addEventListener('click', e=>{
+  fartParams.drums = !fartParams.drums; e.currentTarget.classList.toggle('active', fartParams.drums);
+});
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  Object.assign(fartParams, DEFAULT_FART);
+  Object.keys(fartKnobs).forEach(k=>fartKnobs[k].set(DEFAULT_FART[k]));
+});
+
+let fartToastTimer = null;
+function fartToast(msg){
+  let el = document.getElementById('fartToast');
+  if(!el){ el = document.createElement('div'); el.id='fartToast'; document.body.appendChild(el); }
+  el.textContent = msg; void el.offsetWidth; el.classList.add('show');
+  clearTimeout(fartToastTimer); fartToastTimer = setTimeout(()=>el.classList.remove('show'), 1800);
+}
+function setFartMode(on){
+  fartMode = on;
+  document.documentElement.classList.toggle('fart-mode', on);
+  document.getElementById('fartBtn').classList.toggle('on', on);
+  document.getElementById('appTitle').innerHTML = on
+    ? 'FART MACHINE<small>poot-poot synth · totally serious</small>'
+    : 'ACID MACHINE<small>tb-303 style mono synth</small>';
+  document.getElementById('acidSeqTitle').textContent = on
+    ? 'FART SEQUENCE — tap to toot · ▲▼ picks the pitch · O = octave · dots = bigger & longer'
+    : 'ACID SEQUENCE — tap note to turn on/off · ▲▼ picks the note · O = octave · dots = accent / slide';
+  applyTheme(on ? '#ffb347' : THEMES[themeIndex].hex);
+  livePrevRef.value = false;
+  if(ctx && liveVoice){ liveVoice.ampGain.gain.cancelScheduledValues(ctx.currentTime); liveVoice.ampGain.gain.setTargetAtTime(0, ctx.currentTime, 0.02); }
+  if(on){ fartToast('💨 FART MODE UNLOCKED'); liveFart('poot'); }
+  else fartToast('🎛️ BACK TO ACID');
+}
+document.getElementById('fartBtn').addEventListener('click', ()=> setFartMode(!fartMode));
+
 // ---- WAV export
 let exportSteps = 16;
 document.getElementById('exportLengths').addEventListener('click', e=>{
@@ -2001,6 +2256,15 @@ document.getElementById('playBtn').addEventListener('click', async ()=>{
     document.querySelectorAll('.note-btn.playing, .drum-cell.playing').forEach(el=>el.classList.remove('playing'));
   }
 });
+</script>
+<script>
+// Tell an embedding page how tall the app is, so the iframe can fit without an inner scrollbar.
+(function(){
+  if(window.parent === window) return;
+  function post(){ try{ parent.postMessage({type:'acid-machine:height', height:document.documentElement.scrollHeight}, '*'); }catch(e){} }
+  window.addEventListener('load', post);
+  if(window.ResizeObserver) new ResizeObserver(post).observe(document.body);
+})();
 </script>
 </body>
 </html>
