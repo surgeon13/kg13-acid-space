@@ -418,6 +418,20 @@
   .fv-ped-label{ margin:10px 0 4px; font-size:10px; letter-spacing:1.5px; color:var(--dim); font-weight:700; text-align:center; }
   .fv-ped{ width:100%; height:120px; display:block; border-radius:10px; background:#150b04; border:1px solid #5a3815; touch-action:none; cursor:crosshair; }
   .fv-panel .row{ flex-wrap:wrap; justify-content:center; }
+
+  .mx{ display:flex; justify-content:center; gap:14px; }
+  .mx-ch{ display:flex; flex-direction:column; align-items:center; gap:6px; width:64px; }
+  .mx-val{ font-size:11px; font-weight:700; color:var(--text); min-height:14px; }
+  .mx-track{ position:relative; width:34px; height:130px; border-radius:10px; background:#150b04; border:1px solid #5a3815; touch-action:none; cursor:ns-resize; overflow:hidden; }
+  .mx-fill{ position:absolute; left:0; right:0; bottom:0; background:linear-gradient(180deg,#f0a050,#8a4a14); opacity:.85; }
+  .mx-track.off .mx-fill{ background:#4a3a2a; opacity:.5; }
+  .mx-thumb{ position:absolute; left:2px; right:2px; height:10px; margin-bottom:-5px; border-radius:4px; background:#fff3e0; box-shadow:0 1px 4px rgba(0,0,0,.6); }
+  .mx-mute{
+    font-family:'Orbitron',sans-serif; font-weight:700; font-size:9px; letter-spacing:1px; padding:7px 10px; border-radius:8px;
+    border:1px solid #7a4c1f; background:#35200b; color:var(--dim); cursor:pointer;
+  }
+  .mx-mute.active{ background:linear-gradient(180deg,#e08a30,#8a4a14); color:#fff; border-color:#f0a050; }
+  .mx-name{ font-family:'Rajdhani',sans-serif; font-size:11px; letter-spacing:1px; color:var(--dim); font-weight:700; }
 </style>
 </head>
 <body>
@@ -439,6 +453,19 @@
       <button id="playBtn" class="acid-only">PLAY</button>
     </div>
   </header>
+
+    <div class="panel fart-only" id="fartGrit">
+      <h4>GRIT — what makes it a fart · shared by all three</h4>
+      <div class="row" id="fartGlobalA"></div>
+      <div class="row" id="fartGlobalB"></div>
+      <div class="fart-toggles">
+        <button id="fartEcho">🚽 TOILET ECHO</button>
+        <button id="fartSurprise">🎲 SURPRISE ME</button>
+        <button id="fartSave">⏺ SAVE LAST 12s AS WAV</button>
+      </div>
+      <p class="export-status" id="fartSaveStatus">everything you toot is recorded — save the last 12 seconds any time</p>
+    </div>
+
 
   <div class="panel scope-panel on" id="scopePanel">
     <canvas id="scopeCanvas" width="1000" height="220"></canvas>
@@ -476,18 +503,11 @@
         <button class="fv-pad all" data-v="all"><span class="em">👑</span><span>ALL</span></button>
       </div>
     </div>
-    <div id="fartVoices"></div>
     <div class="panel">
-      <h4>GRIT — what makes it a fart · shared by all three</h4>
-      <div class="row" id="fartGlobalA"></div>
-      <div class="row" id="fartGlobalB"></div>
-      <div class="fart-toggles">
-        <button id="fartEcho">🚽 TOILET ECHO</button>
-        <button id="fartSurprise">🎲 SURPRISE ME</button>
-        <button id="fartSave">⏺ SAVE LAST 12s AS WAV</button>
-      </div>
-      <p class="export-status" id="fartSaveStatus">everything you toot is recorded — save the last 12 seconds any time</p>
+      <h4>MIXER</h4>
+      <div class="mx" id="fartMixer"></div>
     </div>
+    <div id="fartVoices"></div>
   </div>
 
   <div class="panel acid-only">
@@ -970,6 +990,7 @@ const FART_GAIN = 0.3;
 const FART_MAX_HOLD = 4;                 // seconds a held pad can sound
 
 const fartCfg = {
+  master: 1,
   glob: { jitter:.5, shimmer:.5, sputter:.25, breath:.3, wobble:.4, squelch:.4, drive:.2 },
   voices: [0,1,2].map(()=>({ on:true, wave:'sawtooth', cutoff:600, reso:4, level:.7, time:1,
                              a:.01, d:.3, s:.6, r:.15, curve:[0,0,0,0,0,0,0,0] }))
@@ -2252,7 +2273,6 @@ function ensureFartBus(){
 const VKNOBS = [
   ['cutoff','Cutoff',80,6000,v=>Math.round(v)+'Hz','cutoff'],
   ['reso','Reso',.5,24,v=>v.toFixed(1),'reso'],
-  ['level','Level',0,1,v=>Math.round(v*100)+'%','level'],
   ['time','Pitch time',.1,3,v=>v.toFixed(1)+'s','time'],
   ['a','Attack',.002,.5,v=>Math.round(v*1000)+'ms','a'],
   ['d','Decay',.02,1.5,v=>Math.round(v*1000)+'ms','d'],
@@ -2318,8 +2338,8 @@ function setupPed(i){
       '<h4>'+nm+' OSCILLATOR</h4>'+
       '<div class="fv-head"><div class="btngroup" id="fvWave'+i+'"><button data-v="sawtooth">SAW</button><button data-v="square">SQR</button></div>'+
       '<button class="fv-on active" id="fvOn'+i+'">ON</button></div>'+
-      '<div class="row">'+VKNOBS.slice(0,4).map(k=>knobHtml('fv'+i+'-'+k[0],k[1])).join('')+'</div>'+
-      '<div class="row">'+VKNOBS.slice(4).map(k=>knobHtml('fv'+i+'-'+k[0],k[1])).join('')+'</div>'+
+      '<div class="row">'+VKNOBS.slice(0,3).map(k=>knobHtml('fv'+i+'-'+k[0],k[1])).join('')+'</div>'+
+      '<div class="row">'+VKNOBS.slice(3).map(k=>knobHtml('fv'+i+'-'+k[0],k[1])).join('')+'</div>'+
       '<div class="fv-ped-label">PITCH EDITOR — draw the pitch over the “pitch time” · ±4 octaves</div>'+
       '<canvas class="fv-ped" id="fvPed'+i+'" width="720" height="240"></canvas>';
     box.appendChild(p);
@@ -2350,6 +2370,44 @@ function setupPed(i){
   });
 })();
 
+// ---- mixer: one fader per oscillator + master
+const MX_MAX = 1.2;
+const mxEls = {};
+(function buildMixer(){
+  const box = document.getElementById('fartMixer');
+  const chans = FART_VOICE_NAMES.map((nm,i)=>({key:i, name:nm})).concat([{key:'m', name:'MASTER'}]);
+  chans.forEach(c=>{
+    const d = document.createElement('div'); d.className = 'mx-ch';
+    d.innerHTML = '<div class="mx-val"></div><div class="mx-track"><div class="mx-fill"></div><div class="mx-thumb"></div></div>'+
+      (c.key==='m' ? '<span style="height:27px"></span>' : '<button class="mx-mute active">ON</button>')+'<div class="mx-name">'+c.name+'</div>';
+    box.appendChild(d);
+    const track = d.querySelector('.mx-track');
+    mxEls[c.key] = { track, fill:d.querySelector('.mx-fill'), thumb:d.querySelector('.mx-thumb'), val:d.querySelector('.mx-val'), mute:d.querySelector('.mx-mute') };
+    const get = ()=> c.key==='m' ? fartCfg.master : fartCfg.voices[c.key].level;
+    const set = v=>{
+      v = clamp(v,0,MX_MAX);
+      if(c.key==='m'){ fartCfg.master = v; if(fartBus) fartBus.input.gain.value = v; } else fartCfg.voices[c.key].level = v;
+      mixerSync();
+    };
+    let drag = false;
+    const pos = e=>{ const r = track.getBoundingClientRect(); set((1 - (e.clientY - r.top)/r.height)*MX_MAX); };
+    track.addEventListener('pointerdown', e=>{ drag = true; track.setPointerCapture(e.pointerId); pos(e); e.preventDefault(); });
+    track.addEventListener('pointermove', e=>{ if(drag) pos(e); });
+    track.addEventListener('pointerup', ()=>{ drag = false; }); track.addEventListener('pointercancel', ()=>{ drag = false; });
+    if(mxEls[c.key].mute) mxEls[c.key].mute.addEventListener('click', ()=>{ fartCfg.voices[c.key].on = !fartCfg.voices[c.key].on; syncFartUI(); });
+  });
+})();
+function mixerSync(){
+  Object.keys(mxEls).forEach(key=>{
+    const e = mxEls[key], v = key==='m' ? fartCfg.master : fartCfg.voices[key].level, p = clamp(v/MX_MAX,0,1)*100;
+    e.fill.style.height = p+'%'; e.thumb.style.bottom = p+'%'; e.val.textContent = Math.round(v*100);
+    if(e.mute){
+      const on = fartCfg.voices[key].on;
+      e.mute.classList.toggle('active', on); e.mute.textContent = on ? 'ON' : 'OFF'; e.track.classList.toggle('off', !on);
+    }
+  });
+}
+
 function syncFartUI(){
   FART_VOICE_NAMES.forEach((nm,i)=>{
     const v = fartCfg.voices[i];
@@ -2360,6 +2418,7 @@ function syncFartUI(){
     drawPed(i);
   });
   GKNOBS.forEach(k=> fartK['g-'+k[0]].set(fartCfg.glob[k[0]]));
+  mixerSync();
   document.querySelectorAll('#fartPresets button').forEach(b=>b.classList.toggle('active', +b.dataset.v===fartPresetIdx));
 }
 function applyFartPreset(n){
@@ -2376,6 +2435,7 @@ function fartStart(which){
   if(ctx.state==='suspended') ctx.resume();
   const bus = ensureFartBus();
   bus.wetG.gain.value = fartEcho ? .55 : 0;
+  bus.input.gain.value = fartCfg.master;
   const t = ctx.currentTime + .01, idx = which==='all' ? [0,1,2] : [+which];
   return idx.map(i=>startFartNote(ctx, bus.input, noiseBuffer, i, t, fartCfg));
 }
