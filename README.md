@@ -34,10 +34,10 @@ Web Audio API, nothing is fetched except the two fonts.
   accent.
 - **Drum machine**: kick, clap, hats, independently sequenced.
 - **💨 Secret fart mode**: tap the 💨 button in the header to turn the machine into a
-  Fart Machine — new brown skin, 10 fart types (poot, brap, long, squeak, rumble,
-  wet, burst, balloon, silent-but-deadly, epic) on tappable pads, pitch / length /
-  wetness / rattle knobs, random mode, and the sequencer and WAV export play farts.
-  Tap 💨 again to go back to acid.
+  Fart Machine — brown skin, no tempo or sequencer, just 10 fart types (poot, brap,
+  long, squeak, rumble, wet, burst, balloon, silent-but-deadly, epic) on tappable
+  pads, Pitch / Length / Wetness / Rattle knobs, 🎲 Surprise Me, a toilet echo,
+  and "save the last 12 seconds as WAV". Tap 💨 again to go back to acid.
 - **Pattern generator**: 6 styles (Classic 88, Rolling, Screamer, Minimal,
   Dubby, Chaos) × 5 scales (Phrygian, Minor, Minor Pentatonic, Harmonic
   Minor, Chromatic) — rule-based, not random noise: notes anchor to the root
