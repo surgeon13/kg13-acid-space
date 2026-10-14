@@ -33,14 +33,10 @@ Web Audio API, nothing is fetched except the two fonts.
   envelope (also modulates filter cutoff via DEPTH), drive/overdrive, tune,
   accent.
 - **Drum machine**: kick, clap, hats, independently sequenced.
-- **💨 Secret fart mode**: tap the 💨 button in the header to turn the machine into a
-  Fart Machine — brown skin, no tempo or sequencer. Three TB-303-style oscillators
-  (LOW / MID / HIGH), each with saw or square, cutoff, resonance, ADSR and a
-  drawable pitch editor (±4 octaves). The oscillator is a "flapping" oscillator —
-  a train of individual puffs with random timing, loudness and dropouts — shaped by
-  shared Jitter / Shimmer / Sputter / Breath / Wobble / Squelch / Drive knobs. A small mixer
-  (fader + mute per oscillator, plus master) sits above the oscillator panels. Hold a pad to sustain. 8 presets, 🎲 Surprise Me, toilet echo, and
-  "save the last 12 seconds as WAV". Tap 💨 again to go back to acid.
+- **💨 Secret fart mode**: tap the 💨 button in the header for a deliberately tiny
+  Fart Machine — brown skin, six pads (poot, long, brap, squeak, rumble, wet), three
+  knobs (pitch, length, wetness) and "save last 12 seconds as WAV". It is fully
+  separate from the acid engine, which is untouched. Tap 💨 again to go back to acid.
 - **MIDI export**: "Download MIDI" writes the current pattern as a .mid file
   (format 1: tempo track, acid line, drums on channel 10). Accents are louder notes,
   slides are overlapping legato notes, and enabled cutoff / reso / attack / release

@@ -345,7 +345,7 @@
 
   footer{ text-align:center; color:#55565f; font-size:10px; margin-top:10px; letter-spacing:.5px; }
 
-  /* ===== FART MODE ===== */
+  /* ===== FART MODE (kept small; acid code untouched) ===== */
   .fart-only{ display:none; }
   html.fart-mode .fart-only{ display:block; }
   html.fart-mode .acid-only{ display:none !important; }
@@ -353,85 +353,21 @@
     --bg:#1b1006; --panel-top:#44280f; --panel-bot:#2c1a09; --panel-border:#7a4c1f;
     --knob-hi:#f0b070; --knob-lo:#4a2a10; --text:#f7e8d0; --dim:#c4a27a;
   }
-  html.fart-mode body{ background:radial-gradient(ellipse at 50% 0%, #3a2108, #1b1006 70%); }
   html.fart-mode .knob{ background:radial-gradient(circle at 34% 28%, var(--knob-hi), #a5642a 55%, var(--knob-lo) 100%); }
-  html.fart-mode .scope-beats button.active,
-  html.fart-mode #lenBtn.eight-on,
-  html.fart-mode .btngroup button.active,
-  html.fart-mode .scope-types button.active,
-  html.fart-mode #genStyles button.active,
-  html.fart-mode .export-lengths button.active{
-    background:linear-gradient(180deg,#e08a30,#8a4a14); color:#fff; border-color:#f0a050;
-  }
-  #fartBtn{
-    font-size:16px; line-height:1; padding:8px 9px; border-radius:10px; border:1px solid #3a3b47;
-    background:#1c1d25; cursor:pointer; filter:grayscale(.7); opacity:.8;
-  }
+  #fartBtn{ font-size:16px; line-height:1; padding:8px 9px; border-radius:10px; border:1px solid #3a3b47; background:#1c1d25; cursor:pointer; filter:grayscale(.7); opacity:.8; }
   #fartBtn.on{ filter:none; opacity:1; background:linear-gradient(180deg,#e08a30,#8a4a14); border-color:#f0a050; box-shadow:0 0 14px rgba(240,160,80,.6); }
-  .fart-pads{ display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:12px; }
+  .fart-pads{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
   .fart-pad{
-    position:relative; overflow:hidden; min-height:62px; padding:6px 2px; border-radius:12px;
-    border:1px solid #7a4c1f; background:linear-gradient(180deg,#5a3815,#35200b); color:var(--text);
-    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:11px; letter-spacing:.5px; cursor:pointer;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
-  }
-  .fart-pad .em{ font-size:20px; line-height:1; }
-  .fart-pad:active{ transform:scale(.94); }
-  .fart-pad.sel{ border-color:#ffc070; box-shadow:0 0 12px rgba(255,170,70,.65), inset 0 0 0 1px #ffc070; background:linear-gradient(180deg,#8a5420,#4a2a0c); }
-  .fart-pad .puff{ position:absolute; left:50%; top:30%; font-size:22px; pointer-events:none; animation:puffUp .8s ease-out forwards; }
-  @keyframes puffUp{ from{ transform:translate(-50%,0) scale(.6); opacity:.95; } to{ transform:translate(calc(-50% + var(--dx,0px)),-46px) scale(1.8); opacity:0; } }
-  .fart-toggles{ display:flex; gap:8px; justify-content:center; margin-top:10px; }
-  .fart-toggles button{
-    font-family:'Orbitron',sans-serif; font-weight:700; font-size:10px; letter-spacing:1px; padding:10px 12px; border-radius:10px;
-    border:1px solid #7a4c1f; background:#35200b; color:var(--dim); cursor:pointer;
-  }
-  .fart-toggles button.active{ background:linear-gradient(180deg,#e08a30,#8a4a14); color:#fff; border-color:#f0a050; }
-  @keyframes shakeIt{ 0%,100%{ transform:translate(0,0); } 20%{ transform:translate(-3px,2px) rotate(-.3deg); } 40%{ transform:translate(3px,-2px) rotate(.3deg); } 60%{ transform:translate(-2px,-1px); } 80%{ transform:translate(2px,2px); } }
-  #app.shake{ animation:shakeIt .12s linear 6; }
-  #fartToast{
-    position:fixed; left:50%; top:16px; transform:translateX(-50%) translateY(-60px); z-index:99;
-    background:#2c1a09; color:#ffd9a0; border:1px solid #f0a050; border-radius:12px; padding:10px 16px;
-    font-family:'Orbitron',sans-serif; font-weight:700; font-size:11px; letter-spacing:1px; transition:transform .25s; pointer-events:none; white-space:nowrap;
-  }
-  #fartToast.show{ transform:translateX(-50%) translateY(0); }
-
-  .fart-presets{ display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
-  .fart-presets button{
-    font-family:'Rajdhani',sans-serif; font-weight:700; font-size:12px; padding:8px 10px; border-radius:9px;
-    border:1px solid #7a4c1f; background:#35200b; color:var(--text); cursor:pointer;
-  }
-  .fart-presets button.active{ background:linear-gradient(180deg,#e08a30,#8a4a14); color:#fff; border-color:#f0a050; }
-  .fv-pads{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
-  .fv-pad{
-    min-height:92px; border-radius:14px; border:1px solid #7a4c1f; background:linear-gradient(180deg,#5a3815,#35200b);
+    min-height:84px; border-radius:14px; border:1px solid #7a4c1f; background:linear-gradient(180deg,#5a3815,#35200b);
     color:var(--text); font-family:'Orbitron',sans-serif; font-weight:700; font-size:11px; letter-spacing:1px; cursor:pointer;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; touch-action:none;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; touch-action:manipulation;
   }
-  .fv-pad .em{ font-size:26px; line-height:1; }
-  .fv-pad.down{ transform:scale(.95); border-color:#ffc070; box-shadow:0 0 16px rgba(255,170,70,.7); background:linear-gradient(180deg,#8a5420,#4a2a0c); }
-  .fv-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
-  .fv-on{
-    font-family:'Orbitron',sans-serif; font-weight:700; font-size:10px; letter-spacing:1px; padding:9px 14px; border-radius:9px;
-    border:1px solid #7a4c1f; background:#35200b; color:var(--dim); cursor:pointer;
+  .fart-pad .em{ font-size:26px; line-height:1; }
+  .fart-pad:active{ transform:scale(.95); border-color:#ffc070; box-shadow:0 0 14px rgba(255,170,70,.7); }
+  #fartSave{
+    display:block; margin:12px auto 0; font-family:'Orbitron',sans-serif; font-weight:700; font-size:10px; letter-spacing:1px;
+    padding:10px 14px; border-radius:10px; border:1px solid #7a4c1f; background:#35200b; color:var(--text); cursor:pointer;
   }
-  .fv-on.active{ background:linear-gradient(180deg,#e08a30,#8a4a14); color:#fff; border-color:#f0a050; }
-  .fv-ped-label{ margin:10px 0 4px; font-size:10px; letter-spacing:1.5px; color:var(--dim); font-weight:700; text-align:center; }
-  .fv-ped{ width:100%; height:120px; display:block; border-radius:10px; background:#150b04; border:1px solid #5a3815; touch-action:none; cursor:crosshair; }
-  .fv-panel .row{ flex-wrap:wrap; justify-content:center; }
-
-  .mx{ display:flex; justify-content:center; gap:14px; }
-  .mx-ch{ display:flex; flex-direction:column; align-items:center; gap:6px; width:64px; }
-  .mx-val{ font-size:11px; font-weight:700; color:var(--text); min-height:14px; }
-  .mx-track{ position:relative; width:34px; height:130px; border-radius:10px; background:#150b04; border:1px solid #5a3815; touch-action:none; cursor:ns-resize; overflow:hidden; }
-  .mx-fill{ position:absolute; left:0; right:0; bottom:0; background:linear-gradient(180deg,#f0a050,#8a4a14); opacity:.85; }
-  .mx-track.off .mx-fill{ background:#4a3a2a; opacity:.5; }
-  .mx-thumb{ position:absolute; left:2px; right:2px; height:10px; margin-bottom:-5px; border-radius:4px; background:#fff3e0; box-shadow:0 1px 4px rgba(0,0,0,.6); }
-  .mx-mute{
-    font-family:'Orbitron',sans-serif; font-weight:700; font-size:9px; letter-spacing:1px; padding:7px 10px; border-radius:8px;
-    border:1px solid #7a4c1f; background:#35200b; color:var(--dim); cursor:pointer;
-  }
-  .mx-mute.active{ background:linear-gradient(180deg,#e08a30,#8a4a14); color:#fff; border-color:#f0a050; }
-  .mx-name{ font-family:'Rajdhani',sans-serif; font-size:11px; letter-spacing:1px; color:var(--dim); font-weight:700; }
 </style>
 </head>
 <body>
@@ -453,19 +389,6 @@
       <button id="playBtn" class="acid-only">PLAY</button>
     </div>
   </header>
-
-    <div class="panel fart-only" id="fartGrit">
-      <h4>GRIT — what makes it a fart · shared by all three</h4>
-      <div class="row" id="fartGlobalA"></div>
-      <div class="row" id="fartGlobalB"></div>
-      <div class="fart-toggles">
-        <button id="fartEcho">🚽 TOILET ECHO</button>
-        <button id="fartSurprise">🎲 SURPRISE ME</button>
-        <button id="fartSave">⏺ SAVE LAST 12s AS WAV</button>
-      </div>
-      <p class="export-status" id="fartSaveStatus">everything you toot is recorded — save the last 12 seconds any time</p>
-    </div>
-
 
   <div class="panel scope-panel on" id="scopePanel">
     <canvas id="scopeCanvas" width="1000" height="220"></canvas>
@@ -489,25 +412,16 @@
     </div>
   </div>
 
-  <div class="fart-only" id="fartPanel">
-    <div class="panel">
-      <h4>FART PRESETS</h4>
-      <div class="fart-presets" id="fartPresets"></div>
+  <div class="panel fart-only" id="fartPanel">
+    <h4>FART MACHINE — tap a pad</h4>
+    <div class="fart-pads" id="fartPads"></div>
+    <div class="row">
+      <div class="knob-wrap"><div class="knob" id="knob-fpitch"><div class="ind"></div></div><div class="knob-label">Pitch</div><div class="knob-value" id="val-fpitch">0</div></div>
+      <div class="knob-wrap"><div class="knob" id="knob-flen"><div class="ind"></div></div><div class="knob-label">Length</div><div class="knob-value" id="val-flen">1.0x</div></div>
+      <div class="knob-wrap"><div class="knob" id="knob-fwet"><div class="ind"></div></div><div class="knob-label">Wetness</div><div class="knob-value" id="val-fwet">40%</div></div>
     </div>
-    <div class="panel">
-      <h4>TOOT PADS — press &amp; hold to sustain · release to let it fade</h4>
-      <div class="fv-pads" id="fvPads">
-        <button class="fv-pad" data-v="0"><span class="em">🐘</span><span>LOW</span></button>
-        <button class="fv-pad" data-v="1"><span class="em">💨</span><span>MID</span></button>
-        <button class="fv-pad" data-v="2"><span class="em">🐭</span><span>HIGH</span></button>
-        <button class="fv-pad all" data-v="all"><span class="em">👑</span><span>ALL</span></button>
-      </div>
-    </div>
-    <div class="panel">
-      <h4>MIXER</h4>
-      <div class="mx" id="fartMixer"></div>
-    </div>
-    <div id="fartVoices"></div>
+    <button id="fartSave">⏺ SAVE LAST 12s AS WAV</button>
+    <p class="export-status" id="fartSaveStatus"></p>
   </div>
 
   <div class="panel acid-only">
@@ -602,7 +516,7 @@
   </div>
 
   <div class="seq-section acid-only">
-    <h3 id="acidSeqTitle">ACID SEQUENCE — tap note to turn on/off · ▲▼ picks the note · O = octave · dots = accent / slide</h3>
+    <h3>ACID SEQUENCE — tap note to turn on/off · ▲▼ picks the note · O = octave · dots = accent / slide</h3>
     <div class="grid-scroll">
       <div class="acid-row" id="acidRow"></div>
     </div>
@@ -709,11 +623,6 @@ const state = {
     hat:  [true,false,true,false, true,false,true,false, true,false,true,false, true,false,true,false]
   }
 };
-
-// ---------------------------------------------------------------- fart mode state
-let fartMode = false;
-const DEFAULT_FART = {pitch:0, len:1, wet:0.3, rattle:0.2};
-const fartParams = {...DEFAULT_FART, type:'poot', random:false, drums:true, echo:false};
 
 // ---------------------------------------------------------------- audio engine
 let ctx=null, master=null, limiter=null, analyser=null;
@@ -974,147 +883,6 @@ function scheduler(){
   timerID = setTimeout(scheduler, 25);
 }
 
-// ---------------------------------------------------------------- fart engine
-// Three TB-303-style voices (LOW / MID / HIGH). Each is the acid signal path --
-// oscillator -> drive -> resonant lowpass -> amp, with an ADSR on amp and
-// cutoff -- but the oscillator is a *flapping* oscillator instead of a clean
-// saw/square: a real fart is a sphincter opening and closing, so the source is
-// a train of separate airflow puffs. Every puff gets its own random timing
-// (jitter), loudness (shimmer) and chance of dropping out (sputter), with
-// breath noise riding on each puff and a slow random pitch drift. That
-// cycle-to-cycle irregularity is the thing a normal oscillator lacks.
-// SAW = a sharp puff with a long decay, SQR = a flat, blunt puff.
-const FART_VOICE_NAMES = ['LOW','MID','HIGH'];
-const FART_BASE = [55, 165, 495];        // Hz at contour value 0
-const FART_GAIN = 0.3;
-const FART_MAX_HOLD = 4;                 // seconds a held pad can sound
-
-const fartCfg = {
-  master: 1,
-  glob: { jitter:.5, shimmer:.5, sputter:.25, breath:.3, wobble:.4, squelch:.4, drive:.2 },
-  voices: [0,1,2].map(()=>({ on:true, wave:'sawtooth', cutoff:600, reso:4, level:.7, time:1,
-                             a:.01, d:.3, s:.6, r:.15, curve:[0,0,0,0,0,0,0,0] }))
-};
-const FART_PRESETS = [
-  { name:'Classic', glob:{jitter:.5,shimmer:.5,sputter:.25,breath:.3,wobble:.4,squelch:.4,drive:.35}, voices:[
-    {on:true, wave:'sawtooth',cutoff:1180, reso:4, level:.9, time:1.2,a:.006,d:.5, s:.6, r:.2, curve:[10,9,7,5,2,-1,-4,-7]},
-    {on:true, wave:'sawtooth',cutoff:2240, reso:5, level:.75,time:1.0,a:.006,d:.4, s:.5, r:.2, curve:[4,3,1,-1,-4,-7,-10,-13]},
-    {on:true, wave:'square',  cutoff:4200,reso:5, level:.2, time:.9, a:.006,d:.3, s:.4, r:.15,curve:[-6,-4,-2,-4,-8,-12,-16,-20]}]},
-  { name:'Poot', glob:{jitter:.3,shimmer:.3,sputter:0,breath:.2,wobble:.2,squelch:.4,drive:.2}, voices:[
-    {on:true, wave:'sawtooth',cutoff:1210, reso:3, level:.7, time:.16,a:.003,d:.1, s:0,r:.04,curve:[12,10,8,6,4,2,0,-2]},
-    {on:true, wave:'sawtooth',cutoff:2200,reso:4, level:.8, time:.15,a:.003,d:.09,s:0,r:.04,curve:[2,1,0,-2,-4,-5,-6,-7]},
-    {on:false,wave:'square',  cutoff:3300,reso:4, level:.2, time:.15,a:.003,d:.09,s:0,r:.04,curve:[-4,-5,-6,-7,-8,-9,-10,-11]}]},
-  { name:'Long', glob:{jitter:.55,shimmer:.5,sputter:.3,breath:.35,wobble:.5,squelch:.4,drive:.35}, voices:[
-    {on:true, wave:'sawtooth',cutoff:1120, reso:4, level:.9, time:2.6,a:.02,d:.9,s:.6,r:.35,curve:[8,8,7,6,4,1,-3,-9]},
-    {on:true, wave:'sawtooth',cutoff:1960, reso:5, level:.75, time:2.4,a:.02,d:.8,s:.5,r:.35,curve:[3,3,2,0,-3,-7,-12,-18]},
-    {on:true, wave:'square',  cutoff:3360,reso:5, level:.2, time:2.2,a:.03,d:.7,s:.4,r:.3, curve:[0,0,-2,-5,-9,-14,-20,-26]}]},
-  { name:'Squeaky', glob:{jitter:.12,shimmer:.2,sputter:0,breath:.1,wobble:.2,squelch:.5,drive:.1}, voices:[
-    {on:false,wave:'sawtooth',cutoff:520, reso:3, level:.3, time:.8,a:.01,d:.3,s:.5,r:.15,curve:[0,0,0,0,0,0,0,0]},
-    {on:true, wave:'square',  cutoff:2340,reso:6, level:.45,time:.9,a:.01,d:.3,s:.6,r:.15,curve:[6,10,14,16,16,12,6,0]},
-    {on:true, wave:'square',  cutoff:3640,reso:8, level:.6, time:.9,a:.01,d:.3,s:.6,r:.15,curve:[2,6,10,12,12,8,2,-4]}]},
-  { name:'Rumble', glob:{jitter:.7,shimmer:.6,sputter:.35,breath:.35,wobble:.5,squelch:.3,drive:.3}, voices:[
-    {on:true, wave:'sawtooth',cutoff:360, reso:2, level:1.0,time:3.0,a:.05,d:1.0,s:.8,r:.6,curve:[4,3,2,0,-2,-5,-9,-14]},
-    {on:true, wave:'sawtooth',cutoff:580, reso:3, level:.3, time:3.0,a:.05,d:1.0,s:.7,r:.6,curve:[0,-1,-3,-6,-9,-12,-16,-20]},
-    {on:false,wave:'square',  cutoff:1440, reso:3, level:.1, time:3.0,a:.05,d:1.0,s:.5,r:.6,curve:[-6,-8,-10,-12,-14,-16,-18,-20]}]},
-  { name:'Brap', glob:{jitter:.6,shimmer:.6,sputter:.2,breath:.25,wobble:.3,squelch:.4,drive:.3}, voices:[
-    {on:true, wave:'sawtooth',cutoff:1540, reso:4, level:.9, time:1.4,a:.004,d:.3,s:.85,r:.1,curve:[-2,-2,-3,-3,-4,-5,-6,-8]},
-    {on:true, wave:'sawtooth',cutoff:1980, reso:4, level:.4, time:1.2,a:.004,d:.3,s:.8, r:.1,curve:[-12,-12,-13,-14,-15,-16,-18,-20]},
-    {on:false,wave:'square',  cutoff:3300,reso:4, level:.2, time:1.0,a:.004,d:.3,s:.7, r:.1,curve:[-16,-16,-17,-18,-19,-20,-22,-24]}]},
-  { name:'Wet', glob:{jitter:.7,shimmer:.8,sputter:.7,breath:.55,wobble:.7,squelch:.5,drive:.35}, voices:[
-    {on:true, wave:'sawtooth',cutoff:1060, reso:6, level:.9, time:1.6,a:.01,d:.5,s:.6,r:.25,curve:[9,8,6,4,1,-2,-6,-10]},
-    {on:true, wave:'sawtooth',cutoff:1960, reso:7, level:.75, time:1.4,a:.01,d:.5,s:.5,r:.25,curve:[3,2,0,-2,-5,-8,-12,-16]},
-    {on:true, wave:'square',  cutoff:3360,reso:6, level:.2, time:1.2,a:.01,d:.4,s:.4,r:.2, curve:[-2,-3,-5,-8,-11,-14,-18,-22]}]},
-  { name:'Balloon', glob:{jitter:.08,shimmer:.15,sputter:0,breath:.1,wobble:.1,squelch:.5,drive:.1}, voices:[
-    {on:false,wave:'sawtooth',cutoff:520, reso:3, level:.3, time:1.2,a:.02,d:.4,s:.6,r:.2,curve:[0,0,0,0,0,0,0,0]},
-    {on:true, wave:'square',  cutoff:2080,reso:6, level:.5, time:1.4,a:.02,d:.4,s:.7,r:.25,curve:[0,6,10,12,8,2,-6,-14]},
-    {on:true, wave:'square',  cutoff:3380,reso:8, level:.55,time:1.4,a:.02,d:.4,s:.7,r:.25,curve:[-4,2,6,8,4,-2,-10,-18]}]}
-];
-
-function fartCurveFreq(base, curve, u){
-  const x = clamp(u,0,1)*(curve.length-1), i0 = Math.min(curve.length-2, Math.floor(x)), fr = x-i0;
-  const semis = curve[i0] + (curve[i0+1]-curve[i0])*fr;
-  return clamp(base*Math.pow(2, semis/12), 18, 6000);
-}
-const fartCurveCache = {};
-function fartDriveCurve(d){ const k = Math.round(d*20); return fartCurveCache[k] || (fartCurveCache[k] = makeDriveCurve(k/20)); }
-
-// Renders the flapping oscillator for one voice into a buffer (sample by sample).
-function synthFartSource(sr, vi, v, g){
-  const N = Math.floor(sr*FART_MAX_HOLD), buf = new Float32Array(N);
-  const base = FART_BASE[vi], T = clamp(v.time,.08,3);
-  const gauss = ()=> (Math.random()+Math.random()+Math.random()+Math.random()-2)*1.732; // ~N(0,1)
-  const aDrift = 2*Math.PI*6/sr, sDrift = Math.sqrt(2*aDrift);   // ~6 Hz wander
-  const aDC = 2*Math.PI*15/sr;
-  let drift = 0, phase = 0, pf = 1, amp = 1, dc = 0, lp = 0, env = 0;
-  const square = v.wave === 'square';
-  for(let i=0;i<N;i++){
-    const t = i/sr, u = Math.min(1, t/T);
-    drift += -aDrift*drift + sDrift*gauss();
-    const f = fartCurveFreq(base, v.curve, u) * Math.pow(2, g.wobble*drift*.3);
-    phase += f*pf/sr;
-    if(phase >= 1){
-      phase -= Math.floor(phase);
-      // a new puff: pick its timing, loudness and whether it drops out.
-      // irregularity grows as the fart runs out of pressure
-      const grow = .6 + .8*u;
-      pf  = clamp(1 + g.jitter*grow*.5*gauss(), .45, 1.9);
-      amp = clamp(1 + g.shimmer*.5*gauss(), .15, 2);
-      if(Math.random() < g.sputter*(.25 + .75*u)*.5) amp *= .04;
-    }
-    // puff shape
-    let y;
-    if(square) y = phase < .22 ? 1 : 0;
-    else       y = Math.pow(1-phase, 5) * (1 - Math.exp(-phase*260));
-    env = y*amp;
-    y = env + g.breath*.6*Math.abs(env)*gauss();     // turbulence rides on the puff
-    lp += (y - lp)*.85;                              // soften the edges
-    dc += (lp - dc)*aDC;                             // remove DC
-    buf[i] = lp - dc;
-  }
-  let pk = 1e-6; for(let i=0;i<N;i++){ const a = Math.abs(buf[i]); if(a>pk) pk = a; }
-  const k = .9/pk; for(let i=0;i<N;i++) buf[i] *= k;
-  return buf;
-}
-
-// Starts one note on voice `vi` at time t and returns {release(t)}. The note
-// holds (sustain) until release() is called, like a key being held.
-function startFartNote(audioCtx, dest, noiseBuf, vi, t, cfg){
-  const v = cfg.voices[vi], g = cfg.glob, out = { release(){} };
-  if(!v.on) return out;
-  const data = synthFartSource(audioCtx.sampleRate, vi, v, g);
-  const ab = audioCtx.createBuffer(1, data.length, audioCtx.sampleRate); ab.getChannelData(0).set(data);
-  const src = audioCtx.createBufferSource(); src.buffer = ab;
-  const pre = audioCtx.createGain(); pre.gain.value = 1 + g.drive*3;
-  const shaper = audioCtx.createWaveShaper(); shaper.curve = fartDriveCurve(g.drive); shaper.oversample = '2x';
-  const filt = audioCtx.createBiquadFilter(); filt.type = 'lowpass'; filt.Q.value = v.reso;
-  const amp = audioCtx.createGain(); amp.gain.value = 0;
-  src.connect(pre); pre.connect(shaper); shaper.connect(filt); filt.connect(amp); amp.connect(dest);
-
-  // ADSR on amp and on the cutoff (squelch = how far the envelope opens it)
-  const A = Math.max(v.a,.002), D = Math.max(v.d,.01), S = clamp(v.s,0,1), peak = v.level*FART_GAIN;
-  amp.gain.setValueAtTime(0, t);
-  amp.gain.linearRampToValueAtTime(peak, t+A);
-  amp.gain.linearRampToValueAtTime(peak*S, t+A+D);
-  const fPk = clamp(v.cutoff*(1 + g.squelch*5), 60, 12000), fSus = v.cutoff + (fPk - v.cutoff)*S;
-  filt.frequency.setValueAtTime(v.cutoff, t);
-  filt.frequency.linearRampToValueAtTime(fPk, t+A);
-  filt.frequency.linearRampToValueAtTime(fSus, t+A+D);
-
-  src.start(t);
-  let released = false;
-  out.release = function(rt){
-    if(released) return; released = true;
-    rt = Math.max(rt, t + A);
-    const R = Math.max(v.r,.02);
-    [[amp.gain,0],[filt.frequency,v.cutoff]].forEach(([p,target])=>{
-      try{ p.cancelAndHoldAtTime(rt); }catch(e){ p.cancelScheduledValues(rt); }
-      p.setTargetAtTime(target, rt, R/3);
-    });
-    try{ src.stop(rt + R*1.8 + .05); }catch(e){}
-  };
-  return out;
-}
-
 // ---------------------------------------------------------------- WAV export
 function encodeWav(audioBuffer){
   const numChannels = audioBuffer.numberOfChannels;
@@ -1156,7 +924,7 @@ async function renderToWav(steps){
   try{
     const sr = 44100;
     const stepDur = stepDuration();
-    const duration = steps * stepDur + (fartMode ? 5.5 : 0.5); // tail for the last note's release (farts ring out longer)
+    const duration = steps * stepDur + 0.5; // small tail for the last note's release/reverb-free decay
     const offlineCtx = new (window.OfflineAudioContext||window.webkitOfflineAudioContext)(1, Math.ceil(sr*duration), sr);
 
     const offMaster = offlineCtx.createGain(); offMaster.gain.value = 0.9;
@@ -1196,29 +964,18 @@ async function renderToWav(steps){
       for(let i=0;i<data.length;i++){ data[i] = Math.tanh(data[i]*gain*driveAmt) / norm; }
     }
 
-    let outBuf = rendered, outDur = duration;
-    if(fartMode){
-      // trim the silent tail but keep at least the pattern length, with a short fade
-      let last = 0;
-      for(let i=data.length-1;i>=0;i--){ if(Math.abs(data[i])>0.003){ last=i; break; } }
-      const n = Math.min(data.length, Math.max(Math.ceil(steps*stepDur*sr), last+Math.ceil(sr*.05)));
-      const fade = Math.min(n, Math.ceil(sr*.02));
-      for(let i=0;i<fade;i++) data[n-1-i] *= i/fade;
-      outBuf = { numberOfChannels:1, sampleRate:sr, length:n, getChannelData:()=>data.subarray(0,n) };
-      outDur = n/sr;
-    }
-    const blob = encodeWav(outBuf);
+    const blob = encodeWav(rendered);
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     const stamp = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
     a.href = url;
-    a.download = (fartMode ? 'fart-machine-' : 'acid-machine-') + steps + 'steps-' + stamp + '.wav';
+    a.download = 'acid-machine-' + steps + 'steps-' + stamp + '.wav';
     document.body.appendChild(a);
     a.click();
     a.remove();
     setTimeout(()=>URL.revokeObjectURL(url), 4000);
 
-    if(statusEl) statusEl.textContent = 'Saved ' + steps + '-step WAV (' + outDur.toFixed(1) + 's).';
+    if(statusEl) statusEl.textContent = 'Saved ' + steps + '-step WAV (' + duration.toFixed(1) + 's).';
   } catch(err){
     if(statusEl) statusEl.textContent = 'Export failed: ' + err.message;
   } finally {
@@ -2251,272 +2008,6 @@ document.getElementById('resetBtn').addEventListener('click', ()=>{
   drawAutoCanvas();
 });
 
-// ---- FART MODE UI
-const fartK = {};   // knob refs, keyed 'v0-cutoff' / 'g-flap'
-let fartPresetIdx = 0;
-let fartBus = null, fartEcho = false;
-
-function ensureFartBus(){
-  if(fartBus) return fartBus;
-  const input = ctx.createGain(); input.connect(master);
-  const conv = ctx.createConvolver();
-  const L = Math.floor(ctx.sampleRate*1.1), ir = ctx.createBuffer(1, L, ctx.sampleRate), d = ir.getChannelData(0);
-  let lp = 0;
-  for(let i=0;i<L;i++){ lp += ((Math.random()*2-1) - lp)*.35; d[i] = lp*Math.pow(1-i/L,3.2); }
-  conv.buffer = ir;
-  const wetG = ctx.createGain(); wetG.gain.value = 0;
-  input.connect(conv); conv.connect(wetG); wetG.connect(master);
-  return fartBus = {input, wetG};
-}
-
-// ---- knobs
-const VKNOBS = [
-  ['cutoff','Cutoff',80,6000,v=>Math.round(v)+'Hz','cutoff'],
-  ['reso','Reso',.5,24,v=>v.toFixed(1),'reso'],
-  ['time','Pitch time',.1,3,v=>v.toFixed(1)+'s','time'],
-  ['a','Attack',.002,.5,v=>Math.round(v*1000)+'ms','a'],
-  ['d','Decay',.02,1.5,v=>Math.round(v*1000)+'ms','d'],
-  ['s','Sustain',0,1,v=>Math.round(v*100)+'%','s'],
-  ['r','Release',.02,1.5,v=>Math.round(v*1000)+'ms','r']
-];
-const GKNOBS = [
-  ['jitter','Jitter',0,1,v=>Math.round(v*100)+'%'],
-  ['shimmer','Shimmer',0,1,v=>Math.round(v*100)+'%'],
-  ['sputter','Sputter',0,1,v=>Math.round(v*100)+'%'],
-  ['breath','Breath',0,1,v=>Math.round(v*100)+'%'],
-  ['wobble','Wobble',0,1,v=>Math.round(v*100)+'%'],
-  ['squelch','Squelch',0,1,v=>Math.round(v*100)+'%'],
-  ['drive','Drive',0,1,v=>Math.round(v*100)+'%']
-];
-function knobHtml(id,label){
-  return '<div class="knob-wrap"><div class="knob" id="knob-'+id+'"><div class="ind"></div></div><div class="knob-label">'+label+'</div><div class="knob-value" id="val-'+id+'"></div></div>';
-}
-
-// ---- pitch editor
-function drawPed(i){
-  const cv = document.getElementById('fvPed'+i), g = cv.getContext('2d'), w = cv.width, h = cv.height;
-  const curve = fartCfg.voices[i].curve;
-  g.clearRect(0,0,w,h); g.fillStyle='#150b04'; g.fillRect(0,0,w,h);
-  g.font='18px Rajdhani, sans-serif'; g.textBaseline='middle';
-  for(let o=-4;o<=4;o++){
-    const y = h*(.5 - o*12/96);
-    g.strokeStyle = o===0 ? 'rgba(255,200,140,.45)' : 'rgba(255,200,140,.14)'; g.lineWidth = o===0?2:1;
-    g.beginPath(); g.moveTo(0,y); g.lineTo(w,y); g.stroke();
-    if(o!==0 && Math.abs(o)%2===0){ g.fillStyle='rgba(255,200,140,.5)'; g.fillText((o>0?'+':'')+o+' oct', 6, y-10); }
-  }
-  const xs = curve.map((_,k)=> 20 + k*(w-40)/(curve.length-1)), ys = curve.map(c=> h*(.5 - c/96));
-  g.beginPath(); g.moveTo(xs[0],ys[0]); for(let k=1;k<xs.length;k++) g.lineTo(xs[k],ys[k]);
-  g.strokeStyle = ACID; g.lineWidth = 4; g.lineJoin='round'; g.shadowColor = ACID; g.shadowBlur = 12; g.stroke(); g.shadowBlur = 0;
-  g.fillStyle = '#fff';
-  xs.forEach((x,k)=>{ g.beginPath(); g.arc(x,ys[k],7,0,7); g.fill(); });
-}
-function setupPed(i){
-  const cv = document.getElementById('fvPed'+i); let down = false, lastCol = -1;
-  function put(e){
-    const r = cv.getBoundingClientRect(), n = fartCfg.voices[i].curve.length;
-    const col = clamp(Math.round(((e.clientX-r.left)/r.width*cv.width - 20)/((cv.width-40)/(n-1))), 0, n-1);
-    const semis = clamp(Math.round((.5 - (e.clientY-r.top)/r.height)*96), -48, 48);
-    const c = fartCfg.voices[i].curve;
-    if(lastCol>=0 && Math.abs(col-lastCol)>1){
-      const a = Math.min(col,lastCol), b = Math.max(col,lastCol), v0 = c[lastCol];
-      for(let k=a;k<=b;k++) c[k] = Math.round(v0 + (semis-v0)*(k-lastCol)/(col-lastCol));
-    }
-    c[col] = semis; lastCol = col; drawPed(i);
-  }
-  cv.addEventListener('pointerdown', e=>{ down = true; lastCol = -1; cv.setPointerCapture(e.pointerId); put(e); e.preventDefault(); });
-  cv.addEventListener('pointermove', e=>{ if(down) put(e); });
-  const end = ()=>{ down = false; lastCol = -1; };
-  cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
-}
-
-// ---- build the three voice panels + global knobs
-(function buildFartUI(){
-  const box = document.getElementById('fartVoices');
-  FART_VOICE_NAMES.forEach((nm,i)=>{
-    const p = document.createElement('div'); p.className = 'panel fv-panel';
-    p.innerHTML =
-      '<h4>'+nm+' OSCILLATOR</h4>'+
-      '<div class="fv-head"><div class="btngroup" id="fvWave'+i+'"><button data-v="sawtooth">SAW</button><button data-v="square">SQR</button></div>'+
-      '<button class="fv-on active" id="fvOn'+i+'">ON</button></div>'+
-      '<div class="row">'+VKNOBS.slice(0,3).map(k=>knobHtml('fv'+i+'-'+k[0],k[1])).join('')+'</div>'+
-      '<div class="row">'+VKNOBS.slice(3).map(k=>knobHtml('fv'+i+'-'+k[0],k[1])).join('')+'</div>'+
-      '<div class="fv-ped-label">PITCH EDITOR — draw the pitch over the “pitch time” · ±4 octaves</div>'+
-      '<canvas class="fv-ped" id="fvPed'+i+'" width="720" height="240"></canvas>';
-    box.appendChild(p);
-  });
-  document.getElementById('fartGlobalA').innerHTML = GKNOBS.slice(0,4).map(k=>knobHtml('fg-'+k[0],k[1])).join('');
-  document.getElementById('fartGlobalB').innerHTML = GKNOBS.slice(4).map(k=>knobHtml('fg-'+k[0],k[1])).join('');
-
-  FART_VOICE_NAMES.forEach((nm,i)=>{
-    VKNOBS.forEach(k=>{
-      const key = k[0], v = fartCfg.voices[i];
-      fartK['v'+i+'-'+key] = makeKnob('knob-fv'+i+'-'+key, {min:k[2],max:k[3],value:v[key],default:v[key],format:k[4],onChange:x=>{ v[key]=x; }});
-    });
-    document.querySelectorAll('#fvWave'+i+' button').forEach(b=>b.addEventListener('click',()=>{
-      fartCfg.voices[i].wave = b.dataset.v; syncFartUI();
-    }));
-    document.getElementById('fvOn'+i).addEventListener('click',()=>{ fartCfg.voices[i].on = !fartCfg.voices[i].on; syncFartUI(); });
-    setupPed(i);
-  });
-  GKNOBS.forEach(k=>{
-    const key = k[0], g = fartCfg.glob;
-    fartK['g-'+key] = makeKnob('knob-fg-'+key, {min:k[2],max:k[3],value:g[key],default:g[key],format:k[4],onChange:x=>{ g[key]=x; }});
-  });
-  const pr = document.getElementById('fartPresets');
-  FART_PRESETS.forEach((p,n)=>{
-    const b = document.createElement('button'); b.textContent = p.name; b.dataset.v = n;
-    b.addEventListener('click', ()=>{ applyFartPreset(n); fartPlayAll(.9); });
-    pr.appendChild(b);
-  });
-})();
-
-// ---- mixer: one fader per oscillator + master
-const MX_MAX = 1.2;
-const mxEls = {};
-(function buildMixer(){
-  const box = document.getElementById('fartMixer');
-  const chans = FART_VOICE_NAMES.map((nm,i)=>({key:i, name:nm})).concat([{key:'m', name:'MASTER'}]);
-  chans.forEach(c=>{
-    const d = document.createElement('div'); d.className = 'mx-ch';
-    d.innerHTML = '<div class="mx-val"></div><div class="mx-track"><div class="mx-fill"></div><div class="mx-thumb"></div></div>'+
-      (c.key==='m' ? '<span style="height:27px"></span>' : '<button class="mx-mute active">ON</button>')+'<div class="mx-name">'+c.name+'</div>';
-    box.appendChild(d);
-    const track = d.querySelector('.mx-track');
-    mxEls[c.key] = { track, fill:d.querySelector('.mx-fill'), thumb:d.querySelector('.mx-thumb'), val:d.querySelector('.mx-val'), mute:d.querySelector('.mx-mute') };
-    const get = ()=> c.key==='m' ? fartCfg.master : fartCfg.voices[c.key].level;
-    const set = v=>{
-      v = clamp(v,0,MX_MAX);
-      if(c.key==='m'){ fartCfg.master = v; if(fartBus) fartBus.input.gain.value = v; } else fartCfg.voices[c.key].level = v;
-      mixerSync();
-    };
-    let drag = false;
-    const pos = e=>{ const r = track.getBoundingClientRect(); set((1 - (e.clientY - r.top)/r.height)*MX_MAX); };
-    track.addEventListener('pointerdown', e=>{ drag = true; track.setPointerCapture(e.pointerId); pos(e); e.preventDefault(); });
-    track.addEventListener('pointermove', e=>{ if(drag) pos(e); });
-    track.addEventListener('pointerup', ()=>{ drag = false; }); track.addEventListener('pointercancel', ()=>{ drag = false; });
-    if(mxEls[c.key].mute) mxEls[c.key].mute.addEventListener('click', ()=>{ fartCfg.voices[c.key].on = !fartCfg.voices[c.key].on; syncFartUI(); });
-  });
-})();
-function mixerSync(){
-  Object.keys(mxEls).forEach(key=>{
-    const e = mxEls[key], v = key==='m' ? fartCfg.master : fartCfg.voices[key].level, p = clamp(v/MX_MAX,0,1)*100;
-    e.fill.style.height = p+'%'; e.thumb.style.bottom = p+'%'; e.val.textContent = Math.round(v*100);
-    if(e.mute){
-      const on = fartCfg.voices[key].on;
-      e.mute.classList.toggle('active', on); e.mute.textContent = on ? 'ON' : 'OFF'; e.track.classList.toggle('off', !on);
-    }
-  });
-}
-
-function syncFartUI(){
-  FART_VOICE_NAMES.forEach((nm,i)=>{
-    const v = fartCfg.voices[i];
-    document.querySelectorAll('#fvWave'+i+' button').forEach(b=>b.classList.toggle('active', b.dataset.v===v.wave));
-    document.getElementById('fvOn'+i).classList.toggle('active', v.on);
-    document.getElementById('fvOn'+i).textContent = v.on ? 'ON' : 'OFF';
-    VKNOBS.forEach(k=> fartK['v'+i+'-'+k[0]].set(v[k[0]]));
-    drawPed(i);
-  });
-  GKNOBS.forEach(k=> fartK['g-'+k[0]].set(fartCfg.glob[k[0]]));
-  mixerSync();
-  document.querySelectorAll('#fartPresets button').forEach(b=>b.classList.toggle('active', +b.dataset.v===fartPresetIdx));
-}
-function applyFartPreset(n){
-  const p = FART_PRESETS[n]; fartPresetIdx = n;
-  Object.assign(fartCfg.glob, p.glob);
-  p.voices.forEach((pv,i)=>{ Object.assign(fartCfg.voices[i], pv, {curve:pv.curve.slice()}); });
-  syncFartUI();
-}
-
-// ---- playing (hold a pad = hold the note)
-const fartHeld = {};   // pointerId -> [notes]
-function fartStart(which){
-  if(!ctx) initAudio();
-  if(ctx.state==='suspended') ctx.resume();
-  const bus = ensureFartBus();
-  bus.wetG.gain.value = fartEcho ? .55 : 0;
-  bus.input.gain.value = fartCfg.master;
-  const t = ctx.currentTime + .01, idx = which==='all' ? [0,1,2] : [+which];
-  return idx.map(i=>startFartNote(ctx, bus.input, noiseBuffer, i, t, fartCfg));
-}
-function fartStop(notes){ const t = ctx.currentTime; notes.forEach(n=>n.release(t)); }
-function fartPlayAll(hold){ const notes = fartStart('all'); setTimeout(()=>fartStop(notes), hold*1000); }
-
-document.querySelectorAll('.fv-pad').forEach(pad=>{
-  pad.addEventListener('pointerdown', e=>{
-    e.preventDefault(); pad.setPointerCapture(e.pointerId);
-    pad.classList.add('down');
-    fartHeld[e.pointerId] = { notes: fartStart(pad.dataset.v), pad };
-    if(Math.abs(fartCfg.voices[0].curve[7])>0) {}
-    const a = document.getElementById('app'); if(pad.dataset.v==='all' || pad.dataset.v==='0'){ a.classList.remove('shake'); void a.offsetWidth; a.classList.add('shake'); setTimeout(()=>a.classList.remove('shake'), 800); }
-  });
-  const up = e=>{
-    const h = fartHeld[e.pointerId]; if(!h) return;
-    delete fartHeld[e.pointerId]; h.pad.classList.remove('down'); fartStop(h.notes);
-  };
-  pad.addEventListener('pointerup', up); pad.addEventListener('pointercancel', up);
-});
-window.addEventListener('blur', ()=>{ Object.keys(fartHeld).forEach(id=>{ const h=fartHeld[id]; delete fartHeld[id]; h.pad.classList.remove('down'); fartStop(h.notes); }); });
-
-document.getElementById('fartEcho').addEventListener('click', e=>{
-  fartEcho = !fartEcho; e.currentTarget.classList.toggle('active', fartEcho);
-});
-document.getElementById('fartSurprise').addEventListener('click', ()=>{
-  const rnd=(a,b)=>a+Math.random()*(b-a), pick=a=>a[Math.floor(Math.random()*a.length)];
-  const g = fartCfg.glob;
-  g.jitter = rnd(.1,.9); g.shimmer = rnd(.1,.9); g.sputter = rnd(0,.8); g.breath = rnd(0,.7); g.wobble = rnd(0,.9); g.squelch = rnd(.2,.9); g.drive = rnd(0,.5);
-  fartCfg.voices.forEach((v,i)=>{
-    v.on = i===0 || Math.random()<.7; v.wave = pick(['sawtooth','square']);
-    v.cutoff = rnd(180,900)*(i+1)*.8; v.reso = rnd(1,14); v.level = rnd(.3,.9); v.time = rnd(.15,2.2);
-    v.a = rnd(.004,.08); v.d = rnd(.05,.8); v.s = rnd(0,.9); v.r = rnd(.05,.6);
-    let c = rnd(0,12); v.curve = v.curve.map(()=>{ c = clamp(c + rnd(-6,3), -30, 24); return Math.round(c); });
-  });
-  fartPresetIdx = -1; syncFartUI(); fartPlayAll(rnd(.3,1.4));
-});
-document.getElementById('fartSave').addEventListener('click', ()=>{
-  const st = document.getElementById('fartSaveStatus');
-  if(!ctx){ st.textContent = 'toot something first!'; return; }
-  const d = getRingWindow(12);
-  let first = -1, last = -1;
-  for(let i=0;i<d.length;i++){ if(Math.abs(d[i])>0.004){ if(first<0) first=i; last=i; } }
-  if(first<0){ st.textContent = 'nothing recorded yet — toot something first!'; return; }
-  const sr = ctx.sampleRate;
-  const from = Math.max(0, first - Math.ceil(sr*.05)), to = Math.min(d.length, last + Math.ceil(sr*.1));
-  const out = new Float32Array(d.subarray(from, to));
-  const fade = Math.min(out.length, Math.ceil(sr*.03));
-  for(let i=0;i<fade;i++) out[out.length-1-i] *= i/fade;
-  const buf = { numberOfChannels:1, sampleRate:sr, length:out.length, getChannelData:()=>out };
-  const url = URL.createObjectURL(encodeWav(buf));
-  const a = document.createElement('a'); a.href = url;
-  a.download = 'fart-machine-' + new Date().toISOString().replace(/[:.]/g,'-').slice(0,19) + '.wav';
-  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 4000);
-  st.textContent = 'Saved ' + (out.length/sr).toFixed(1) + 's of farts.';
-});
-document.getElementById('resetBtn').addEventListener('click', ()=>{ applyFartPreset(0); });
-
-let fartToastTimer = null;
-function fartToast(msg){
-  let el = document.getElementById('fartToast');
-  if(!el){ el = document.createElement('div'); el.id='fartToast'; document.body.appendChild(el); }
-  el.textContent = msg; void el.offsetWidth; el.classList.add('show');
-  clearTimeout(fartToastTimer); fartToastTimer = setTimeout(()=>el.classList.remove('show'), 1800);
-}
-function setFartMode(on){
-  fartMode = on;
-  document.documentElement.classList.toggle('fart-mode', on);
-  document.getElementById('fartBtn').classList.toggle('on', on);
-  document.getElementById('appTitle').innerHTML = on
-    ? 'FART MACHINE<small>three-oscillator fart synth</small>'
-    : 'ACID MACHINE<small>tb-303 style mono synth</small>';
-  applyTheme(on ? '#ffb347' : THEMES[themeIndex].hex);
-  livePrevRef.value = false;
-  if(on && isPlaying) document.getElementById('playBtn').click();
-  if(on){ applyFartPreset(fartPresetIdx>=0?fartPresetIdx:0); fartToast('💨 FART MODE UNLOCKED'); fartPlayAll(.4); }
-  else fartToast('🎛️ BACK TO ACID');
-}
-document.getElementById('fartBtn').addEventListener('click', ()=> setFartMode(!fartMode));
-applyFartPreset(0);
-
 // ---- MIDI export (Standard MIDI File, format 1, 480 ticks per quarter note)
 function vlq(n){ const b=[n&0x7f]; n>>=7; while(n>0){ b.unshift((n&0x7f)|0x80); n>>=7; } return b; }
 function midiTrack(events, endTick){
@@ -2591,6 +2082,114 @@ document.getElementById('midiBtn').addEventListener('click', ()=>{
     if(st) st.textContent='Saved '+exportSteps+'-step MIDI at '+Math.round(params.bpm)+' BPM — drag it into Ableton.';
   }catch(err){ if(st) st.textContent='MIDI export failed: '+err.message; }
 });
+
+// ---- FART MODE: one tiny synth, fully separate from the acid engine
+// A fart is a flapping sphincter, i.e. a train of separate air puffs with
+// irregular timing, so the source is a puff train with random period / loudness
+// / dropouts (not a clean oscillator), through one lowpass and a quick envelope.
+const FARTS = {
+  poot:   {name:'POOT',   em:'💨', f0:190, f1:120, dur:.18, cut:1500, jit:.25, shim:.3, sput:0,  breath:.2, sq:0},
+  long:   {name:'LONG',   em:'🚂', f0:120, f1:62,  dur:1.5, cut:1100, jit:.5,  shim:.5, sput:.3, breath:.3, sq:0},
+  brap:   {name:'BRAP',   em:'🎺', f0:62,  f1:44,  dur:1.0, cut:1000, jit:.55, shim:.6, sput:.2, breath:.25,sq:0},
+  squeak: {name:'SQUEAK', em:'🐭', f0:520, f1:380, dur:.7,  cut:2600, jit:.08, shim:.15,sput:0,  breath:.1, sq:1},
+  rumble: {name:'RUMBLE', em:'🌋', f0:80,  f1:42,  dur:2.2, cut:700,  jit:.6,  shim:.6, sput:.35,breath:.35,sq:0},
+  wet:    {name:'WET',    em:'💦', f0:135, f1:80,  dur:1.1, cut:900,  jit:.7,  shim:.8, sput:.7, breath:.5, sq:0}
+};
+const fartP = { pitch:0, len:1, wet:.4 };
+let fartMode = false;
+
+function fartBuffer(audioCtx, f, dur){
+  const sr = audioCtx.sampleRate, N = Math.floor(sr*dur), data = new Float32Array(N);
+  const gauss = ()=> (Math.random()+Math.random()+Math.random()+Math.random()-2)*1.732;
+  const pm = Math.pow(2, fartP.pitch/12), w = fartP.wet;
+  const jit = f.jit*(.5+w), shim = f.shim*(.5+w), sput = f.sput*w*2, breath = f.breath*(.5+w);
+  const aD = 2*Math.PI*6/sr, sD = Math.sqrt(2*aD), aDC = 2*Math.PI*15/sr;
+  let drift = 0, phase = 0, pf = 1, amp = 1, dc = 0, lp = 0;
+  for(let i=0;i<N;i++){
+    const u = i/N;
+    drift += -aD*drift + sD*gauss();
+    const hz = f.f0*Math.pow(f.f1/f.f0, u)*pm*Math.pow(2, drift*.12*w);
+    phase += hz*pf/sr;
+    if(phase >= 1){
+      phase -= Math.floor(phase);
+      const g = .6 + .8*u;                                   // gets rougher as it runs out of air
+      pf  = Math.min(1.9, Math.max(.45, 1 + jit*g*.5*gauss()));
+      amp = Math.min(2, Math.max(.15, 1 + shim*.5*gauss()));
+      if(Math.random() < sput*(.25 + .75*u)*.5) amp *= .04;  // missed puff
+    }
+    let y = f.sq ? (phase < .22 ? 1 : 0) : Math.pow(1-phase, 5)*(1 - Math.exp(-phase*260));
+    y = y*amp; y += breath*.6*Math.abs(y)*gauss();           // turbulence rides on each puff
+    lp += (y - lp)*.85; dc += (lp - dc)*aDC;
+    data[i] = lp - dc;
+  }
+  let pk = 1e-6; for(let i=0;i<N;i++){ const a = Math.abs(data[i]); if(a>pk) pk = a; }
+  const k = .9/pk; for(let i=0;i<N;i++) data[i] *= k;
+  return data;
+}
+
+function playFart(audioCtx, dest, key, t){
+  const f = FARTS[key], dur = Math.min(3, f.dur*fartP.len);
+  const data = fartBuffer(audioCtx, f, dur);
+  const buf = audioCtx.createBuffer(1, data.length, audioCtx.sampleRate); buf.getChannelData(0).set(data);
+  const src = audioCtx.createBufferSource(); src.buffer = buf;
+  const lpf = audioCtx.createBiquadFilter(); lpf.type = 'lowpass'; lpf.Q.value = 3;
+  lpf.frequency.setValueAtTime(f.cut*2.5, t); lpf.frequency.exponentialRampToValueAtTime(f.cut*.6, t+dur);
+  const amp = audioCtx.createGain();
+  amp.gain.setValueAtTime(0, t); amp.gain.linearRampToValueAtTime(.45, t+.005);
+  amp.gain.setValueAtTime(.45, t+dur*.6); amp.gain.linearRampToValueAtTime(0, t+dur);
+  src.connect(lpf); lpf.connect(amp); amp.connect(dest);
+  src.start(t);
+}
+
+(function buildFart(){
+  const box = document.getElementById('fartPads');
+  Object.keys(FARTS).forEach(key=>{
+    const b = document.createElement('button'); b.className = 'fart-pad';
+    b.innerHTML = '<span class="em">'+FARTS[key].em+'</span><span>'+FARTS[key].name+'</span>';
+    b.addEventListener('pointerdown', e=>{
+      e.preventDefault();
+      if(!ctx) initAudio();
+      if(ctx.state==='suspended') ctx.resume();
+      playFart(ctx, master, key, ctx.currentTime+.01);
+    });
+    box.appendChild(b);
+  });
+})();
+const fartKnobs = {
+  pitch: makeKnob('knob-fpitch',{min:-12,max:12,value:0,default:0,format:v=>(v>0?'+':'')+Math.round(v),onChange:v=>{fartP.pitch=Math.round(v);}}),
+  len:   makeKnob('knob-flen',{min:.5,max:2,value:1,default:1,format:v=>v.toFixed(1)+'x',onChange:v=>{fartP.len=v;}}),
+  wet:   makeKnob('knob-fwet',{min:0,max:1,value:.4,default:.4,format:v=>Math.round(v*100)+'%',onChange:v=>{fartP.wet=v;}})
+};
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  fartP.pitch = 0; fartP.len = 1; fartP.wet = .4;
+  fartKnobs.pitch.set(0); fartKnobs.len.set(1); fartKnobs.wet.set(.4);
+});
+document.getElementById('fartSave').addEventListener('click', ()=>{
+  const st = document.getElementById('fartSaveStatus');
+  if(!ctx){ st.textContent = 'toot something first!'; return; }
+  const d = getRingWindow(12);
+  let first = -1, last = -1;
+  for(let i=0;i<d.length;i++){ if(Math.abs(d[i])>0.004){ if(first<0) first=i; last=i; } }
+  if(first<0){ st.textContent = 'nothing recorded yet'; return; }
+  const sr = ctx.sampleRate, from = Math.max(0, first-Math.ceil(sr*.05)), to = Math.min(d.length, last+Math.ceil(sr*.1));
+  const out = new Float32Array(d.subarray(from,to)), fade = Math.min(out.length, Math.ceil(sr*.03));
+  for(let i=0;i<fade;i++) out[out.length-1-i] *= i/fade;
+  const url = URL.createObjectURL(encodeWav({numberOfChannels:1, sampleRate:sr, length:out.length, getChannelData:()=>out}));
+  const a = document.createElement('a'); a.href = url;
+  a.download = 'fart-machine-'+new Date().toISOString().replace(/[:.]/g,'-').slice(0,19)+'.wav';
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 4000);
+  st.textContent = 'Saved '+(out.length/sr).toFixed(1)+'s.';
+});
+function setFartMode(on){
+  fartMode = on;
+  document.documentElement.classList.toggle('fart-mode', on);
+  document.getElementById('fartBtn').classList.toggle('on', on);
+  document.getElementById('appTitle').innerHTML = on ? 'FART MACHINE<small>poot-poot synth · totally serious</small>'
+                                                    : 'ACID MACHINE<small>tb-303 style mono synth</small>';
+  applyTheme(on ? '#ffb347' : THEMES[themeIndex].hex);
+  if(on && isPlaying) document.getElementById('playBtn').click();
+}
+document.getElementById('fartBtn').addEventListener('click', ()=> setFartMode(!fartMode));
 
 // ---- WAV export
 let exportSteps = 16;
