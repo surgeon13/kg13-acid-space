@@ -1000,6 +1000,7 @@ function highlightStep(i){
   ['kick','clap','hat'].forEach(row=>{
     const c = document.getElementById(row+'-'+i); if(c) c.classList.add('playing');
   });
+  if(isPlaying) embedPost('acid-machine:step', embedStepInfo(i));
 }
 
 // ---------------------------------------------------------------- knob factory
@@ -2217,12 +2218,49 @@ document.getElementById('playBtn').addEventListener('click', async ()=>{
     scheduler();
     requestAnimationFrame(uiLoop);
     btn.textContent = 'STOP'; btn.classList.add('on');
+    embedPost('acid-machine:transport', {playing:true, bpm:Math.round(params.bpm), steps:numSteps});
   } else {
     isPlaying = false; clearTimeout(timerID);
     btn.textContent = 'PLAY'; btn.classList.remove('on');
+    embedPost('acid-machine:transport', {playing:false, bpm:Math.round(params.bpm), steps:numSteps});
     if(liveVoice){ liveVoice.ampGain.gain.cancelScheduledValues(ctx.currentTime); liveVoice.ampGain.gain.setTargetAtTime(0, ctx.currentTime, 0.03); }
     document.querySelectorAll('.note-btn.playing, .drum-cell.playing').forEach(el=>el.classList.remove('playing'));
   }
+});
+</script>
+<script>
+// Embed API: lets a page that embeds the machine in an iframe follow along.
+// Messages to the parent (only when embedded):
+//   {type:'acid-machine:height', height}                       content height, for sizing the iframe
+//   {type:'acid-machine:transport', playing, bpm, steps}       on play / stop
+//   {type:'acid-machine:step', step, steps, bpm, note, accent, slide, kick, clap, hat, cutoff, reso}
+//        every 16th step as it is heard (note is e.g. "D#2", or null for a rest)
+// Messages the parent can send ({type:'acid-machine:command', cmd, value}):
+//   'play' | 'stop' | 'toggle', 'bpm' (value 40-200), 'generate' (new acid line + drums),
+//   'state' (replies with a transport message)
+function embedPost(type, data){
+  if(window.parent === window) return;
+  try{ parent.postMessage(Object.assign({type:type}, data||{}), '*'); }catch(e){}
+}
+function embedStepInfo(i){
+  const idx = i % numSteps, s = state.acid[idx];
+  let note = null;
+  if(s && s.active){
+    const semi = DEGREES[s.degreeIndex] + 12 * s.octave + 9;      // root is A
+    note = NOTE_NAMES[((semi % 12) + 12) % 12] + (1 + Math.floor(semi / 12));
+  }
+  return {step:idx, steps:numSteps, bpm:Math.round(params.bpm), note:note,
+          accent:!!(s && s.active && s.accent), slide:!!(s && s.active && s.slide),
+          kick:!!state.drums.kick[idx], clap:!!state.drums.clap[idx], hat:!!state.drums.hat[idx],
+          cutoff:Math.round(params.cutoff), reso:Math.round(params.reso)};
+}
+window.addEventListener('message', function(e){
+  if(e.source !== window.parent || !e.data || e.data.type !== 'acid-machine:command') return;
+  const play = document.getElementById('playBtn'), cmd = e.data.cmd;
+  if(cmd === 'toggle' || (cmd === 'play' && !isPlaying) || (cmd === 'stop' && isPlaying)){ if(!fartMode) play.click(); }
+  else if(cmd === 'bpm' && knobRefs.bpm){ const v = Math.max(40, Math.min(200, +e.data.value || params.bpm)); knobRefs.bpm.set(v); params.bpm = Math.round(v); }
+  else if(cmd === 'generate'){ generateAcid(); generateDrums(); }
+  if(cmd === 'state' || cmd === 'bpm') embedPost('acid-machine:transport', {playing:isPlaying, bpm:Math.round(params.bpm), steps:numSteps});
 });
 </script>
 <script>

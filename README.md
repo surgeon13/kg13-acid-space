@@ -73,6 +73,20 @@ height to the parent window on load and on change
 listener script resizes the iframe to match — no inner scrollbar, and it
 keeps working as the app's content grows in future updates.
 
+The embedding page can also follow the music and drive the machine
+(handy for games, visualisers and dancing avatars):
+
+- the app posts `{type:'acid-machine:transport', playing, bpm, steps}` on
+  play/stop, and `{type:'acid-machine:step', step, steps, bpm, note, accent,
+  slide, kick, clap, hat, cutoff, reso}` for every 16th step as it is heard
+  (`note` like `"D#2"`, or `null` for a rest);
+- the parent can send `{type:'acid-machine:command', cmd}` with `cmd` one of
+  `play`, `stop`, `toggle`, `bpm` (plus `value` 40–200), `generate` (new acid
+  line + drums) or `state` (answers with a transport message). Commands are
+  only accepted from the window that embeds the app.
+
+Nevet's farm uses this for its DJ booth in party mode.
+
 If the embedding page sends a `Content-Security-Policy` header, make sure
 `font-src` allows `fonts.gstatic.com` and `style-src` allows
 `fonts.googleapis.com` — or ask for a self-hosted-fonts version instead.
