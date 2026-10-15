@@ -18,6 +18,8 @@ kg13-acid-space/
 ├── embed/
 │   ├── snippet.html     copy-paste iframe embed code
 │   └── example.html     full demo page showing it embedded in a mock site
+├── engine/
+│   └── acid-engine.js   the sound engine on its own (TB-303 + TR-909), no interface
 └── README.md            this file
 ```
 
@@ -63,6 +65,28 @@ Web Audio API, nothing is fetched except the two fonts.
 - **8/16-step toggle**: fewer steps = bigger touch targets on mobile.
 - **Reset button**: restores every knob to default and clears all
   automation lanes.
+
+## The engine on its own (`engine/acid-engine.js`)
+
+For pages that want the sound but their own controls (Nevet's farm uses it
+for its party-mode synth). One plain script, no dependencies, one global:
+
+```js
+var eng = AcidEngine.create({ bpm: 128 });
+eng.onStep = function (info) { /* every 16th as it is heard: step, note, accent, slide, drums, kick, cutoff, reso, bpm */ };
+eng.start();                       // from a tap: browsers need a gesture for sound
+eng.acid[3].active = true;         // 16 steps of {active, degreeIndex, accent, slide, octave}
+eng.drums.oh[2] = true;            // bd sd cp ch oh rs, 16 steps each
+eng.set303('cutoff', 900); eng.setBpm(135); eng.swing = 0.2;
+eng.setMute('tr909', true);        // or 'tb303'
+eng.generate('rolling');           // classic rolling hoover minimal dub chaos
+```
+
+- **TB-303**: the same voice, envelopes and pattern generator as the app
+  (osc → drive → resonant low-pass → amp, accents, slides).
+- **TR-909**: a synthesized kit (no samples): kick, snare, clap, closed and
+  open hat (the closed one chokes the open one), rim; level, tune and decay
+  per drum, plus swing.
 
 ## Embedding elsewhere (e.g. via iframe)
 
