@@ -105,7 +105,7 @@ The embedding page can also follow the music and drive the machine
   slide, kick, clap, hat, cutoff, reso}` for every 16th step as it is heard
   (`note` like `"D#2"`, or `null` for a rest);
 - the parent can send `{type:'acid-machine:command', cmd}` with `cmd` one of
-  `play`, `stop`, `toggle`, `bpm` (plus `value` 40–200), `generate` (new acid
+  `play`, `stop`, `toggle`, `bpm` (plus `value` 40–300), `generate` (new acid
   line + drums) or `state` (answers with a transport message). Commands are
   only accepted from the window that embeds the app.
 

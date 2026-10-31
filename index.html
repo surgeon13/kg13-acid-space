@@ -1068,7 +1068,7 @@ function makeKnob(id, {min,max,value,onChange,format,default:defaultVal}){
 }
 
 const knobRefs = {};
-knobRefs.bpm = makeKnob('knob-bpm', {min:40,max:200,value:params.bpm, default:DEFAULT_PARAMS.bpm, format:v=>Math.round(v),
+knobRefs.bpm = makeKnob('knob-bpm', {min:40,max:300,value:params.bpm, default:DEFAULT_PARAMS.bpm, format:v=>Math.round(v),
   onChange:v=>{ params.bpm=Math.round(v); }});
 knobRefs.tune = makeKnob('knob-tune', {min:PARAM_RANGES.tune.min,max:PARAM_RANGES.tune.max,value:params.tune, default:DEFAULT_PARAMS.tune, format:v=>Math.round(v),
   onChange:v=>{ params.tune=Math.round(v); }});
@@ -2236,7 +2236,7 @@ document.getElementById('playBtn').addEventListener('click', async ()=>{
 //   {type:'acid-machine:step', step, steps, bpm, note, accent, slide, kick, clap, hat, cutoff, reso}
 //        every 16th step as it is heard (note is e.g. "D#2", or null for a rest)
 // Messages the parent can send ({type:'acid-machine:command', cmd, value}):
-//   'play' | 'stop' | 'toggle', 'bpm' (value 40-200), 'generate' (new acid line + drums),
+//   'play' | 'stop' | 'toggle', 'bpm' (value 40-300), 'generate' (new acid line + drums),
 //   'state' (replies with a transport message)
 function embedPost(type, data){
   if(window.parent === window) return;
@@ -2258,7 +2258,7 @@ window.addEventListener('message', function(e){
   if(e.source !== window.parent || !e.data || e.data.type !== 'acid-machine:command') return;
   const play = document.getElementById('playBtn'), cmd = e.data.cmd;
   if(cmd === 'toggle' || (cmd === 'play' && !isPlaying) || (cmd === 'stop' && isPlaying)){ if(!fartMode) play.click(); }
-  else if(cmd === 'bpm' && knobRefs.bpm){ const v = Math.max(40, Math.min(200, +e.data.value || params.bpm)); knobRefs.bpm.set(v); params.bpm = Math.round(v); }
+  else if(cmd === 'bpm' && knobRefs.bpm){ const v = Math.max(40, Math.min(300, +e.data.value || params.bpm)); knobRefs.bpm.set(v); params.bpm = Math.round(v); }
   else if(cmd === 'generate'){ generateAcid(); generateDrums(); }
   if(cmd === 'state' || cmd === 'bpm') embedPost('acid-machine:transport', {playing:isPlaying, bpm:Math.round(params.bpm), steps:numSteps});
 });

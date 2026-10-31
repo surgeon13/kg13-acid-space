@@ -243,7 +243,7 @@
       transport();
     };
     eng.toggle = function () { if (eng.playing) eng.stop(); else eng.start(); return eng.playing; };
-    eng.setBpm = function (b) { eng.bpm = Math.round(clamp(b, 60, 180)); transport(); };
+    eng.setBpm = function (b) { eng.bpm = Math.round(clamp(b, 60, 300)); transport(); };     // 60-300 BPM: up to gabber and speedcore
     eng.set303 = function (k, v) {
       var r = P303_RANGES[k]; if (r) v = clamp(v, r[0], r[1]);
       eng.p303[k] = v;
